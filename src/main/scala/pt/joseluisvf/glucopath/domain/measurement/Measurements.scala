@@ -2,6 +2,8 @@ package pt.joseluisvf.glucopath.domain.measurement
 
 import java.util.UUID
 
+import pt.joseluisvf.glucopath.presentation.util.DisplayOptions
+
 import scala.collection.mutable.ListBuffer
 
 case class Measurements(measurements: ListBuffer[Measurement] = ListBuffer.empty) {
@@ -22,5 +24,9 @@ case class Measurements(measurements: ListBuffer[Measurement] = ListBuffer.empty
     val sizeBefore = measurements.size
     measurements --= measurements.filter(_.id == id)
     if (sizeBefore != measurements.size) Some(this) else None
+  }
+
+  override def toString: String = {
+    measurements.map(_.toString()).mkString(s"\n${DisplayOptions.getSmallSeparator}\n")
   }
 }

@@ -20,15 +20,17 @@ abstract class AbstractMeasurementTest extends WordSpec with Matchers {
       .withMonth(1)
       .withYear(1)
   protected val DEFAULT_WHAT_WAS_EATEN = "food"
+  protected val DEFAULT_CARBOHYDRATES_EATEN = 2
   protected val DEFAULT_INSULIN_ADMINISTERED = 4
   protected val DEFAULT_COMMENTS = "no comments"
-  protected val DEFAULT_WARNING_LEVEL: measurement.WarningLevel.Value = WarningLevel.defaultWarningLevel
+  protected val DEFAULT_WARNING_LEVEL: measurement.WarningLevel.Value = Measurement.defaultWarningLevel
   protected val DEFAULT_BEFORE_OR_AFTER_MEAL = BeforeOrAfterMeal.BEFORE_MEAL
 
   protected val DEFAULT_GLUCOSE_1 = 100
   protected val DEFAULT_DATE_1: LocalDateTime = LocalDateTime.now()
   protected val DEFAULT_BEFORE_OR_AFTER_MEAL_1 = BeforeOrAfterMeal.BEFORE_MEAL
   protected val DEFAULT_WHAT_WAS_EATEN_1 = "Apples"
+  protected val DEFAULT_CARBOHYDRATES_EATEN_1 = 1
   protected val DEFAULT_INSULIN_ADMINISTERED_1 = 10
   protected val DEFAULT_COMMENTS_1 = "no comments - 1"
   protected val DEFAULT_WARNING_LEVEL_1 = WarningLevel.GREEN
@@ -38,6 +40,7 @@ abstract class AbstractMeasurementTest extends WordSpec with Matchers {
   protected val DEFAULT_DATE_2: LocalDateTime = LocalDateTime.now()
   protected val DEFAULT_BEFORE_OR_AFTER_MEAL_2 = BeforeOrAfterMeal.AFTER_MEAL
   protected val DEFAULT_WHAT_WAS_EATEN_2 = "Oranges"
+  protected val DEFAULT_CARBOHYDRATES_EATEN_2 = 2
   protected val DEFAULT_INSULIN_ADMINISTERED_2 = 20
   protected val DEFAULT_COMMENTS_2 = "no comments - 2"
   protected val DEFAULT_WARNING_LEVEL_2 = WarningLevel.YELLOW
@@ -50,6 +53,7 @@ abstract class AbstractMeasurementTest extends WordSpec with Matchers {
       DEFAULT_DATE_TIME,
       DEFAULT_BEFORE_OR_AFTER_MEAL,
       DEFAULT_WHAT_WAS_EATEN,
+      DEFAULT_CARBOHYDRATES_EATEN,
       DEFAULT_INSULIN_ADMINISTERED,
       DEFAULT_COMMENTS,
       DEFAULT_WARNING_LEVEL)
@@ -59,6 +63,7 @@ abstract class AbstractMeasurementTest extends WordSpec with Matchers {
                                   date: LocalDateTime,
                                   beforeOrAfterMeal: BeforeOrAfterMeal,
                                   whatWasEaten: String,
+                                  carbohydratesEaten: Int,
                                   insulinAdministered: Int,
                                   comments: String,
                                   warningLevel: WarningLevel,
@@ -69,7 +74,7 @@ abstract class AbstractMeasurementTest extends WordSpec with Matchers {
     val instanceMirror = rm.reflect(Measurement)
     val methodmakeMeasurementWithId = ru.typeOf[Measurement.type].decl(ru.TermName("makeMeasurementWithId")).asMethod
     val bugh = instanceMirror.reflectMethod(methodmakeMeasurementWithId)
-    bugh(glucose, date, beforeOrAfterMeal, whatWasEaten, insulinAdministered, comments, warningLevel, id).asInstanceOf[Measurement]
+    bugh(glucose, date, beforeOrAfterMeal, whatWasEaten, carbohydratesEaten, insulinAdministered, comments, warningLevel, id).asInstanceOf[Measurement]
   }
 
 

@@ -31,6 +31,10 @@ case class Day(dayStatistics: DayStatistics, measurements: Measurements = Measur
   }
 
   def getGlucoseAverage: Float = dayStatistics.glucoseAverage
+
+  override def toString: String = {
+    s"Metrics for $date :\n${dayStatistics.toString}\n\nMeasurements:\n${measurements.toString}"
+  }
 }
 
 object Day {

@@ -8,14 +8,14 @@ import pt.joseluisvf.glucopath.domain.measurement.{BeforeOrAfterMeal, Measuremen
 import pt.joseluisvf.glucopath.exception.DayDoesNotExistException
 
 class UserTest extends WordSpec with Matchers with BeforeAndAfterEach {
-  var user: User = null
-  val aMeasurement = Measurement(10, BeforeOrAfterMeal.BEFORE_MEAL, "apple", 1, "no comments")
-  val anotherMeasurement = Measurement(1, BeforeOrAfterMeal.BEFORE_MEAL, "orange", 2, "no comments")
-  val aMeasurementForToday = Measurement(10, LocalDateTime.now(), BeforeOrAfterMeal.BEFORE_MEAL, "apple", 1, "no comments", WarningLevel.YELLOW)
-  val anotherMeasurementForToday = Measurement(100, LocalDateTime.now(), BeforeOrAfterMeal.BEFORE_MEAL, "apple", 1, "no comments", WarningLevel.YELLOW)
+  var user: User = _
+  val aMeasurement = Measurement(10, BeforeOrAfterMeal.BEFORE_MEAL, "apple", 1, 1, "no comments")
+  val anotherMeasurement = Measurement(1, BeforeOrAfterMeal.BEFORE_MEAL, "orange", 1, 2, "no comments")
+  val aMeasurementForToday = Measurement(10, LocalDateTime.now(), BeforeOrAfterMeal.BEFORE_MEAL, "apple", 1, 1, "no comments", WarningLevel.YELLOW)
+  val anotherMeasurementForToday = Measurement(100, LocalDateTime.now(), BeforeOrAfterMeal.BEFORE_MEAL, "apple", 1, 1, "no comments", WarningLevel.YELLOW)
 
   override def beforeEach() {
-    user = new User("joseluisvf", Days(), DiabeticProfile())
+    user = new User("joseluisvf", Days(), DiabeticProfile(50, (80, 150), 12))
   }
 
 

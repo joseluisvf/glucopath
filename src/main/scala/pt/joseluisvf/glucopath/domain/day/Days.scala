@@ -5,6 +5,7 @@ import java.util.UUID
 
 import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
 import pt.joseluisvf.glucopath.exception.DayDoesNotExistException
+import pt.joseluisvf.glucopath.presentation.util.DisplayOptions
 
 import scala.collection.mutable.ListBuffer
 
@@ -27,7 +28,7 @@ case class Days(days: ListBuffer[Day] = ListBuffer.empty) {
     }
   }
 
-  private def getDayByDate(date: LocalDate): Option[Day] = days.find(_.date == date)
+  def getDayByDate(date: LocalDate): Option[Day] = days.find(_.date == date)
 
   def getMeasurement(id: UUID, date: LocalDate): Option[Measurement] = {
     val maybeDay = getDayByDate(date)
@@ -36,6 +37,10 @@ case class Days(days: ListBuffer[Day] = ListBuffer.empty) {
       case Some(day) => day.getMeasurement(id)
       case _ => throw new DayDoesNotExistException(date)
     }
+  }
+
+  def getToday: Option[Day] = {
+    getDayByDate(LocalDate.now())
   }
 
   def getTodayMeasurements: Option[Measurements] = {
@@ -62,4 +67,13 @@ case class Days(days: ListBuffer[Day] = ListBuffer.empty) {
     allMeasurements
   }
 
+  def aggregateDayStatistics: DayStatistics = {
+    days.foldLeft(DayStatistics()){
+      (accum, item) => accum + item.dayStatistics
+    }
+  }
+
+  override def toString: String = {
+    s"Days:\n${days.map(_.toString()).mkString(DisplayOptions.getSeparator)}"
+  }
 }

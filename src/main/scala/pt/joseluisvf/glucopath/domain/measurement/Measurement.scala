@@ -15,6 +15,8 @@ trait Measurement {
 
   def whatWasEaten: String
 
+  def carbohydratesEatenInGrams: Int
+
   def insulinAdministered: Int
 
   def comments: String
@@ -24,16 +26,24 @@ trait Measurement {
   def id: UUID
 
   require(glucose > 0, "glucose must be a valid non-negative amount")
-  require(insulinAdministered > 0, "insulin administered must be a valid non-negative amount")
+  require(insulinAdministered >= 0, "insulin administered must be a valid non-negative amount")
+  require(carbohydratesEatenInGrams >= 0, "carbohydrates eaten must be a valid non-negative amount")
+
+  //  override def toString = s"Measurement($glucose, $date, $beforeOrAfterMeal, $whatWasEaten, $insulinAdministered, $comments, $warningLevel, $id)"
+
+  override def toString = s"Measurement(glucose=$glucose, date=$date, beforeOrAfterMeal=$beforeOrAfterMeal\n whatWasEaten=$whatWasEaten, carbohydratesEatenInGrams=$carbohydratesEatenInGrams, insulinAdministered=$insulinAdministered\n comments=$comments, warningLevel=$warningLevel, id=$id)"
 }
 
 object Measurement {
+  val defaultWarningLevel = WarningLevel.GREEN
+
 
   private case class MeasurementImpl(
                                       glucose: Int,
                                       date: LocalDateTime,
                                       beforeOrAfterMeal: BeforeOrAfterMeal,
                                       whatWasEaten: String,
+                                      carbohydratesEatenInGrams: Int,
                                       insulinAdministered: Int,
                                       comments: String,
                                       warningLevel: WarningLevel,
@@ -43,41 +53,43 @@ object Measurement {
              glucose: Int,
              beforeOrAfterMeal: BeforeOrAfterMeal,
              whatWasEaten: String,
+             carbohydratesEatenInGrams: Int,
              insulinAdministered: Int,
              comments: String): Measurement =
-    MeasurementImpl(glucose, LocalDateTime.now(), beforeOrAfterMeal, whatWasEaten, insulinAdministered, comments, WarningLevel.defaultWarningLevel)
+    MeasurementImpl(glucose, LocalDateTime.now(), beforeOrAfterMeal, whatWasEaten, carbohydratesEatenInGrams, insulinAdministered, comments, defaultWarningLevel)
 
   def apply(
              glucose: Int,
              date: LocalDateTime,
              beforeOrAfterMeal: BeforeOrAfterMeal,
              whatWasEaten: String,
+             carbohydratesEatenInGrams: Int,
              insulinAdministered: Int,
              comments: String): Measurement =
-    MeasurementImpl(glucose, date, beforeOrAfterMeal, whatWasEaten, insulinAdministered, comments, WarningLevel.defaultWarningLevel)
+    MeasurementImpl(glucose, date, beforeOrAfterMeal, whatWasEaten, carbohydratesEatenInGrams, insulinAdministered, comments, defaultWarningLevel)
 
   def apply(
              glucose: Int,
              date: LocalDateTime,
              beforeOrAfterMeal: BeforeOrAfterMeal,
              whatWasEaten: String,
+             carbohydratesEatenInGrams: Int,
              insulinAdministered: Int,
              comments: String,
              warningLevel: WarningLevel): Measurement =
-    MeasurementImpl(glucose, date, beforeOrAfterMeal, whatWasEaten, insulinAdministered, comments, warningLevel)
+    MeasurementImpl(glucose, date, beforeOrAfterMeal, whatWasEaten, carbohydratesEatenInGrams, insulinAdministered, comments, warningLevel)
 
   // TODO temos de permutar sobre todos os defaults ou que??? raios partam
 
-
-  // for testing purposes only
-  protected def makeMeasurementWithId(
-                                       glucose: Int,
-                                       date: LocalDateTime,
-                                       beforeOrAfterMeal: BeforeOrAfterMeal,
-                                       whatWasEaten: String,
-                                       insulinAdministered: Int,
-                                       comments: String,
-                                       warningLevel: WarningLevel,
-                                       id: UUID): Measurement =
-    MeasurementImpl(glucose, date, beforeOrAfterMeal, whatWasEaten, insulinAdministered, comments, warningLevel, id)
+  def makeMeasurementWithId(
+                             glucose: Int,
+                             date: LocalDateTime,
+                             beforeOrAfterMeal: BeforeOrAfterMeal,
+                             whatWasEaten: String,
+                             carbohydratesEatenInGrams: Int,
+                             insulinAdministered: Int,
+                             comments: String,
+                             warningLevel: WarningLevel,
+                             id: UUID): Measurement =
+    MeasurementImpl(glucose, date, beforeOrAfterMeal, whatWasEaten, carbohydratesEatenInGrams, insulinAdministered, comments, warningLevel, id)
 }

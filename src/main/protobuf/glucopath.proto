@@ -1,0 +1,57 @@
+message MeasurementProto {
+    enum BeforeOrAfterMeal {
+        BEFORE_MEAL = 1;
+        AFTER_MEAL = 2;
+    }
+
+    enum WarningLevel {
+        GREEN = 1;
+        YELLOW = 2;
+        RED = 3;
+    }
+
+    required int32 glucose = 1;
+    required string date = 2;
+    required BeforeOrAfterMeal beforeOrAfterMeal = 3;
+    required string whatWasEaten = 4;
+    required int32 carbohydratesEatenInGrams = 5;
+    required int32 insulinAdministered = 6;
+    optional string comments = 7;
+    required WarningLevel warningLevel = 8;
+    required string id = 9;
+}
+
+message MeasurementsProto {
+    repeated MeasurementProto measurements = 1;
+}
+
+message DayStatisticsProto {
+    required int32 numberOfMeasurements = 1;
+    required int32 insulinTotal = 2;
+    required int32 glucoseTotal = 3;
+    required int32 carbohydratesTotal = 4;
+}
+
+message DayProto {
+    required DayStatisticsProto dayStatistics = 1;
+    required MeasurementsProto measurements = 2;
+    required string date = 3;
+    required string id = 4;
+}
+
+message DaysProto {
+    repeated DayProto days = 1;
+}
+
+message DiabeticProfileProto {
+    required int32 glucoseMitigationPerInsulinUnit = 1;
+    required int32 idealGlucoseRangeMinimum = 2;
+    required int32 idealGlucoseRangeMaximum = 3;
+    required int32 carbohydrateMitigationPerInsulinUnit = 4;
+}
+
+message UserProto {
+    required string name = 1;
+    required DaysProto days = 2;
+    required DiabeticProfileProto diabeticProfile = 3;
+}
