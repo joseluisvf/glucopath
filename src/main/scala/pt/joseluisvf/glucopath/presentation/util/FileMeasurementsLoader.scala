@@ -22,7 +22,7 @@ object FileMeasurementsLoader {
   private def parseMeasurement(measurementAsText: String): Measurement = {
     val splitMeasurement = measurementAsText.split(",")
     val glucose = Integer.parseInt(splitMeasurement(0))
-    val date = LocalDateTime.parse(splitMeasurement(1), DateTimeFormatter.ofPattern("dd MM yyyy HH:mm"))
+    val date = LocalDateTime.parse(splitMeasurement(1))
     val beforeOrAfterMeal = if (splitMeasurement(2) == "b") BeforeOrAfterMeal.BEFORE_MEAL else BeforeOrAfterMeal.AFTER_MEAL
     val whatWasEaten = splitMeasurement(3)
     val carbsEaten = Integer.parseInt(splitMeasurement(4))
