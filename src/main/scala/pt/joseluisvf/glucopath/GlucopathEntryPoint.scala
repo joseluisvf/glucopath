@@ -1,5 +1,6 @@
 package pt.joseluisvf.glucopath
 
+import java.io.FileNotFoundException
 import java.time.{LocalDate, LocalDateTime}
 
 import measurement.{DayProto, MeasurementProto, UserProto}
@@ -283,8 +284,13 @@ object GlucopathMenu {
   def importMeasurementsFromCsvFile(user: User): Unit = {
     val pathToFile = requestChoiceFromUser("Absolute path to CSV file?")
     println("Importing measurements...")
+    try {
     FileMeasurementsLoader.importMeasurementsFrom(pathToFile, user)
     println("Measurements imported with success.")
+    } catch {
+      case _: FileNotFoundException =>
+        ErrorHandler.displayErrorMessage(s"The provided path <$pathToFile> does not correspond to an existing file")
+    }
   }
 
   def showOverallInfo(user: User): Unit = {
