@@ -29,15 +29,24 @@ object MeasurementMenu extends GlucopathMenu {
   override protected def executeOption(option: String): Boolean = {
     option match {
       case OPTION_0 => false;
-      case OPTION_1 => updateUser(addMeasurement()); println(DisplayOptions.getSeparator); true
-      case OPTION_2 => calculateInsulinToAdminister(); println(DisplayOptions.getSeparator); true
+      case OPTION_1 => updateUser(collectAndAddMeasurement()); println(DisplayOptions.getSeparator); true
+      case OPTION_2 => calculateInsulinToAdminister() match {
+        case Some(u) => updateUser(u)
+        case _ =>
+      }
+        println(DisplayOptions.getSeparator)
+        true
       case _ => println("Invalid Option; please pick again"); true
     }
   }
 
-  private def addMeasurement(): User = {
-    val measurement: Measurement = collectMeasurementFromUser()
-    val measurementProto: MeasurementProto = MeasurementMapperImpl.toProto(measurement)
+  private def collectAndAddMeasurement(): User = {
+    val toAdd: Measurement = collectMeasurementFromUser()
+    addMeasurement(toAdd)
+  }
+
+  private def addMeasurement(toAdd: Measurement): User = {
+    val measurementProto: MeasurementProto = MeasurementMapperImpl.toProto(toAdd)
     var userProto: UserProto = UserMapperImpl.toProto(user)
 
     userProto = UserServiceImpl.addMeasurement(userProto, measurementProto)
@@ -53,7 +62,7 @@ object MeasurementMenu extends GlucopathMenu {
     println("[-->     ]")
     val beforeOrAfterMeal: BeforeOrAfterMeal = getBeforeOrAfterMeal
     println("[--->    ]")
-    val whatWasEaten = requestChoiceFromUser("food?")
+    val whatWasEaten = requestChoiceFromUser("food?").replace(",", " ")
     println("[---->   ]")
     val carbohydratesEatenInGrams: Int = getNonNegativeMeasurement("how many grams of carbohydrates were eaten?")
     println("[----->  ]")
@@ -147,11 +156,36 @@ object MeasurementMenu extends GlucopathMenu {
     warningLevel
   }
 
-  def calculateInsulinToAdminister(): Unit = {
+  def calculateInsulinToAdminister(): Option[User] = {
     val glucoseMeasured = getNonNegativeMeasurement("glucose measured (mg/dl)")
     val carbohydratesConsumed = getNonNegativeMeasurement("carbohydrates consumed (grams)")
-    val result = user.calculateHowMuchInsulinToAdminister(glucoseMeasured, carbohydratesConsumed)
+    val insulinToAdminister = user.calculateHowMuchInsulinToAdminister(glucoseMeasured, carbohydratesConsumed)
 
-    println(s"Given the collected data and your diabetic profile, we recommend you administer\n$result units of insulin.\n")
+    println(s"Given the collected data and your diabetic profile, we recommend you administer\n$insulinToAdminister units of insulin.\n" +
+      s"Would you like to create a measurement based on this?")
+    // check whether the user wants to create a measurement based on this
+    val userChoiceCreateMeasurement = requestChoiceFromUser("Y/N\n(press enter for default - yes)")
+    userChoiceCreateMeasurement.toUpperCase() match {
+      case "" | "Y" =>
+        val toAdd: Measurement = collectPartialMeasurementFromUser(glucoseMeasured, carbohydratesConsumed, insulinToAdminister)
+        val modifiedUser: User = addMeasurement(toAdd)
+        println("Measurement added with success.")
+        Some(modifiedUser)
+      case _ => None
+    }
+  }
+
+  private def collectPartialMeasurementFromUser(glucoseMeasured: Int, carbohydratesConsumed: Int, insulinToAdminister: Int) = {
+    println("[>   ]")
+    val date: LocalDateTime = getDateTime
+    println("[->  ]")
+    val beforeOrAfterMeal: BeforeOrAfterMeal = BeforeOrAfterMeal.BEFORE_MEAL
+    val whatWasEaten = requestChoiceFromUser("food?").replace(",", " ")
+    println("[--> ]")
+    val comments = requestChoiceFromUser("comments?").replace(",", " ")
+    println("[--->]")
+    val warningLevel = getWarningLevel
+
+    Measurement(glucoseMeasured, date, beforeOrAfterMeal, whatWasEaten, carbohydratesConsumed, insulinToAdminister, comments, warningLevel)
   }
 }

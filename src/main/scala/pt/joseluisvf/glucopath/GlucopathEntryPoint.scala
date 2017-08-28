@@ -25,7 +25,6 @@ object GlucopathEntryPoint extends App {
         val user: User = createUser()
         GlucopathIO.saveUserToFile(user)
         user
-
     }
   }
 
