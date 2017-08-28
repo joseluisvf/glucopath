@@ -34,4 +34,11 @@ case class DiabeticProfile(
     if (result < 0) 0
     else result
   }
+
+  val minGlucoseRange: Int = idealGlucoseRange._1
+  val maxGlucoseRange: Int = idealGlucoseRange._2
+
+  def isGlucoseHipoglicemia(glucose: Int): Boolean = glucose <= minGlucoseRange
+  def isGlucoseHiperglicemia(glucose: Int): Boolean = glucose >= maxGlucoseRange
+  def isGlucoseInRange(glucose: Int): Boolean = minGlucoseRange < glucose && glucose < maxGlucoseRange
 }

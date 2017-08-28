@@ -2,7 +2,7 @@ package pt.joseluisvf.glucopath.service.impl
 
 import measurement.{DayProto, MeasurementProto, UserProto}
 import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
-import pt.joseluisvf.glucopath.domain.user.User
+import pt.joseluisvf.glucopath.domain.user.{User, UserStatistics}
 import pt.joseluisvf.glucopath.domain.util.DateParser
 import pt.joseluisvf.glucopath.persistence.GlucopathIO
 import pt.joseluisvf.glucopath.service.UserService
@@ -56,5 +56,16 @@ object UserServiceImpl extends UserService {
       s"${measurement.insulinAdministered}," +
       s"${measurement.comments}," +
       s"${measurement.warningLevel.toString}"
+  }
+
+  override def showMetricsPerTimePeriod(userProto: UserProto): String = {
+    val user: User = UserMapperImpl.toEntity(userProto)
+    UserStatistics.showMetricsPerTimePeriod(user)
+  }
+
+  override def writeMetricsPerTimePeriod(userProto: UserProto): Unit = {
+    val user: User = UserMapperImpl.toEntity(userProto)
+    val metricsAsCsv = UserStatistics.getMetricsAsCsv(user)
+    GlucopathIO.saveMetricsToFile(metricsAsCsv)
   }
 }

@@ -76,7 +76,9 @@ object GlucopathMenu {
         "6 - import measurements from a CSV file\n" +
         "7 - show overall info\n" +
         "8 - write measurements to file\n" +
-        "9 - exit"
+        "9 - show metrics per time period\n" +
+        "10 - write metrics per time period\n" +
+        "11 - exit"
     )
 
     println(DisplayOptions.getSeparator)
@@ -104,7 +106,9 @@ object GlucopathMenu {
       case "6" => importMeasurementsFromCsvFile(user); GlucopathIO.saveUserToFile(user); println(DisplayOptions.getSeparator)
       case "7" => showOverallInfo(user); println(DisplayOptions.getSeparator)
       case "8" => writeMeasurementsToFile(user); println(DisplayOptions.getSeparator)
-      case "9" => System.exit(1)
+      case "9" => showMetricsPerTimePeriod(user); println(DisplayOptions.getSeparator)
+      case "10" => writeMetricsPerTimePeriod(user); println(DisplayOptions.getSeparator)
+      case "11" => System.exit(1)
       case _ => println("Invalid Option; please pick again")
     }
   }
@@ -285,8 +289,8 @@ object GlucopathMenu {
     val pathToFile = requestChoiceFromUser("Absolute path to CSV file?")
     println("Importing measurements...")
     try {
-    FileMeasurementsLoader.importMeasurementsFrom(pathToFile, user)
-    println("Measurements imported with success.")
+      FileMeasurementsLoader.importMeasurementsFrom(pathToFile, user)
+      println("Measurements imported with success.")
     } catch {
       case _: FileNotFoundException =>
         ErrorHandler.displayErrorMessage(s"The provided path <$pathToFile> does not correspond to an existing file")
@@ -299,10 +303,23 @@ object GlucopathMenu {
     println(result)
   }
 
-  def writeMeasurementsToFile(user: User) : Unit = {
+  def writeMeasurementsToFile(user: User): Unit = {
     val userProto: UserProto = UserMapperImpl.toProto(user)
     println("Exporting measurements...")
     UserServiceImpl.exportMeasurements(userProto)
     println("Measurements imported with success.")
+  }
+
+  def showMetricsPerTimePeriod(user: User): Unit = {
+    val userProto: UserProto = UserMapperImpl.toProto(user)
+    val result = UserServiceImpl.showMetricsPerTimePeriod(userProto)
+    println(result)
+  }
+
+  def writeMetricsPerTimePeriod(user: User): Unit = {
+    val userProto: UserProto = UserMapperImpl.toProto(user)
+    println("Exporting metrics...")
+    UserServiceImpl.writeMetricsPerTimePeriod(userProto)
+    println("Metrics imported with success.")
   }
 }
