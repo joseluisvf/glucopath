@@ -38,7 +38,7 @@ object UserServiceImpl extends UserService {
     user.getOverallInfo
   }
 
-  private def saveUserToFile(user: User) = GlucopathIO.saveUserToFile(user)
+  def saveUserToFile(user: User): Unit = GlucopathIO.saveUserToFile(user)
 
   override def exportMeasurements(userProto: UserProto): Unit = {
     val user: User = UserMapperImpl.toEntity(userProto)

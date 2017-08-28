@@ -1,9 +1,8 @@
 package pt.joseluisvf.glucopath.presentation.util
 
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
-import pt.joseluisvf.glucopath.domain.measurement.{BeforeOrAfterMeal, Measurement, Measurements, WarningLevel}
+import pt.joseluisvf.glucopath.domain.measurement.{BeforeOrAfterMeal, Measurement, WarningLevel}
 import pt.joseluisvf.glucopath.domain.user.User
 
 import scala.io.Source
@@ -12,7 +11,7 @@ import scala.io.Source
 object FileMeasurementsLoader {
   def importMeasurementsFrom(filePath: String, user: User): User = {
 
-    for (line <- Source.fromFile(filePath).getLines) {
+    for (line <- Source.fromFile(filePath).getLines.drop(1)) {
       user.addMeasurement(parseMeasurement(line))
     }
 

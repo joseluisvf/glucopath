@@ -31,7 +31,10 @@ trait Measurement {
 
   //  override def toString = s"Measurement($glucose, $date, $beforeOrAfterMeal, $whatWasEaten, $insulinAdministered, $comments, $warningLevel, $id)"
 
-  override def toString = s"Measurement(glucose=$glucose, date=$date, beforeOrAfterMeal=$beforeOrAfterMeal\n whatWasEaten=$whatWasEaten, carbohydratesEatenInGrams=$carbohydratesEatenInGrams, insulinAdministered=$insulinAdministered\n comments=$comments, warningLevel=$warningLevel, id=$id)"
+  override def toString =
+    s"Measurement(glucose = $glucose, date = $date, beforeOrAfterMeal = $beforeOrAfterMeal\n" +
+    s" whatWasEaten = $whatWasEaten, carbohydratesEatenInGrams = $carbohydratesEatenInGrams, insulinAdministered = $insulinAdministered\n" +
+    s" comments = $comments, warningLevel = $warningLevel, id = $id)"
 }
 
 object Measurement {

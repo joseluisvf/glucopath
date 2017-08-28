@@ -41,7 +41,8 @@ object GlucopathIO {
 
   def saveMeasurementsToFile(measurements: String): Unit = {
     val writer = new PrintWriter(new File(measurementsFileLocation))
-    writer.write(measurements)
+    val toWrite = "glucose,date,before or after meal,what was eaten,carbohydrates eaten in grams,insulin administered,comments,warning level\n" + measurements
+    writer.write(toWrite)
     writer.close()
   }
 
