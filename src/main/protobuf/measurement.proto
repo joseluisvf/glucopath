@@ -32,11 +32,17 @@ message DayStatisticsProto {
     required int32 carbohydratesTotal = 4;
 }
 
+message SlowInsulinProto {
+    required string date = 1;
+    required int32 amount = 2;
+}
+
 message DayProto {
     required DayStatisticsProto dayStatistics = 1;
     required MeasurementsProto measurements = 2;
     required string date = 3;
     required string id = 4;
+    optional SlowInsulinProto slowInsulin = 5;
 }
 
 message DaysProto {

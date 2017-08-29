@@ -1,9 +1,9 @@
 package pt.joseluisvf.glucopath.domain.user
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
-import pt.joseluisvf.glucopath.domain.day.{Day, Days}
+import pt.joseluisvf.glucopath.domain.day.{Day, Days, SlowInsulin}
 import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
 import pt.joseluisvf.glucopath.exception.DayError
 import pt.joseluisvf.glucopath.presentation.util.DisplayOptions
@@ -35,4 +35,8 @@ class User(val name: String, val days: Days, var diabeticProfile: DiabeticProfil
   }
 
   def alterDiabeticProfile(newDiabeticProfile: DiabeticProfile): Unit = this.diabeticProfile = newDiabeticProfile
+
+  def alterSlowInsulin(slowInsulin: SlowInsulin, localDateTime: LocalDateTime) = {
+    days.alterSlowInsulin(slowInsulin, localDateTime)
+  }
 }

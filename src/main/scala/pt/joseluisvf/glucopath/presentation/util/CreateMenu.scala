@@ -2,15 +2,16 @@ package pt.joseluisvf.glucopath.presentation.util
 
 import java.time.LocalDateTime
 
-import measurement.{DiabeticProfileProto, MeasurementProto, UserProto}
+import measurement.{DiabeticProfileProto, MeasurementProto, SlowInsulinProto, UserProto}
+import pt.joseluisvf.glucopath.domain.day.SlowInsulin
 import pt.joseluisvf.glucopath.domain.measurement.BeforeOrAfterMeal.BeforeOrAfterMeal
 import pt.joseluisvf.glucopath.domain.measurement.WarningLevel.WarningLevel
 import pt.joseluisvf.glucopath.domain.measurement.{BeforeOrAfterMeal, Measurement, WarningLevel}
 import pt.joseluisvf.glucopath.domain.user.User
 import pt.joseluisvf.glucopath.domain.util.DateParser
-import pt.joseluisvf.glucopath.exception.DiabeticProfileError
+import pt.joseluisvf.glucopath.exception.{DiabeticProfileError, SlowInsulinError, SlowInsulinException}
 import pt.joseluisvf.glucopath.service.impl.UserServiceImpl
-import pt.joseluisvf.glucopath.service.mapper.{MeasurementMapperImpl, UserMapperImpl}
+import pt.joseluisvf.glucopath.service.mapper.{MeasurementMapperImpl, SlowInsulinMapperImpl, UserMapperImpl}
 
 object CreateMenu extends GlucopathMenu {
   private val OPTION_1 = "1"
@@ -19,6 +20,8 @@ object CreateMenu extends GlucopathMenu {
   private val OPTION_2_TEXT = "Calculate Insulin to Administer"
   private val OPTION_3 = "3"
   private val OPTION_3_TEXT = "Alter Diabetic Profile"
+  private val OPTION_4 = "4"
+  private val OPTION_4_TEXT = "Add slow insulin information"
 
 
   override protected var availableOptions: String =
@@ -29,6 +32,7 @@ object CreateMenu extends GlucopathMenu {
       s"$OPTION_1 - $OPTION_1_TEXT\n" +
       s"$OPTION_2 - $OPTION_2_TEXT\n" +
       s"$OPTION_3 - $OPTION_3_TEXT\n" +
+      s"$OPTION_4 - $OPTION_4_TEXT\n" +
       DisplayOptions.getSeparator + "\n"
 
   override protected def executeOption(option: String): Boolean = {
@@ -43,6 +47,13 @@ object CreateMenu extends GlucopathMenu {
         true
 
       case OPTION_3 => alterDiabeticProfile() match {
+        case Some(u) => updateUser(u)
+        case _ =>
+      }
+        println(DisplayOptions.getSeparator)
+        true
+
+      case OPTION_4 => addSlowInsulinInformation() match {
         case Some(u) => updateUser(u)
         case _ =>
       }
@@ -221,7 +232,32 @@ object CreateMenu extends GlucopathMenu {
 
     eitherAltereredUser match {
       case Left(error) => UserFeedbackHandler.displayErrorMessage(error.reason); None
-      case Right(u) => UserFeedbackHandler.displaySuccessMessage("Diabetic Profile altered with success!");Some(UserMapperImpl.toEntity(u));
+      case Right(u) =>
+        UserFeedbackHandler.displaySuccessMessage("Diabetic Profile altered with success.")
+        Some(UserMapperImpl.toEntity(u));
+    }
+  }
+
+  def addSlowInsulinInformation(): Option[User] = {
+    val date: LocalDateTime = getDateTime
+    val amount: Int = getNonNegativeMeasurement("amount of slow insulin")
+
+    try {
+      val slowInsulin: SlowInsulin = SlowInsulin(date.toLocalTime, amount)
+      val slowInsulinProto: SlowInsulinProto = SlowInsulinMapperImpl.toProto(slowInsulin)
+
+
+      val userProto: UserProto = UserMapperImpl.toProto(user)
+      UserServiceImpl.alterSlowInsulin(userProto, slowInsulinProto, date) match {
+        case Left(error) => UserFeedbackHandler.displayErrorMessage(error.reason); None
+        case Right(u) =>
+          UserFeedbackHandler.displaySuccessMessage("Slow insulin altered with success.")
+          Some(UserMapperImpl.toEntity(u))
+      }
+    } catch {
+      case sie: SlowInsulinException =>
+        UserFeedbackHandler.displayErrorMessage(sie.getGlucopathError.reason)
+        None
     }
   }
 }
