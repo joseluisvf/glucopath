@@ -5,15 +5,16 @@ import java.util.UUID
 
 import pt.joseluisvf.glucopath.domain.day.{Day, Days}
 import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
+import pt.joseluisvf.glucopath.exception.DayError
 import pt.joseluisvf.glucopath.presentation.util.DisplayOptions
 
-class User(val name: String, val days: Days, val diabeticProfile: DiabeticProfile) {
+class User(val name: String, val days: Days, var diabeticProfile: DiabeticProfile) {
 
   def addMeasurement(toAdd: Measurement): Measurements = days.addMeasurement(toAdd)
 
-  def getMeasurement(id: UUID, date: LocalDate): Option[Measurement] = days.getMeasurement(id, date)
+  def getMeasurement(id: UUID, date: LocalDate): Either[DayError, Option[Measurement]] = days.getMeasurement(id, date)
 
-  def removeMeasurement(id: UUID, date: LocalDate): Measurements = days.removeMeasurement(id, date)
+  def removeMeasurement(id: UUID, date: LocalDate): Either[DayError, Measurements] = days.removeMeasurement(id, date)
 
   def getAllMeasurements: Measurements = days.getAllMeasurements
 
@@ -32,4 +33,6 @@ class User(val name: String, val days: Days, val diabeticProfile: DiabeticProfil
       s"Aggregated Statistics:\n${this.days.aggregateDayStatistics}\n${DisplayOptions.getSeparator}" +
       s"All days:\n${days.toString}"
   }
+
+  def alterDiabeticProfile(newDiabeticProfile: DiabeticProfile): Unit = this.diabeticProfile = newDiabeticProfile
 }

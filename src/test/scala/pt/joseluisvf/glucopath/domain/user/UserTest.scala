@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
 import pt.joseluisvf.glucopath.domain.day.Days
 import pt.joseluisvf.glucopath.domain.measurement.{BeforeOrAfterMeal, Measurement, WarningLevel}
-import pt.joseluisvf.glucopath.exception.DayDoesNotExistException
+import pt.joseluisvf.glucopath.exception.{DayDoesNotExistException, DayError, DayWithDateDoesNotExistError}
 
 class UserTest extends WordSpec with Matchers with BeforeAndAfterEach {
   var user: User = _
@@ -23,8 +23,12 @@ class UserTest extends WordSpec with Matchers with BeforeAndAfterEach {
     "add measurement" should {
       "add a measurement if it is valid" in {
         user.addMeasurement(aMeasurement)
-        val retrievedMeasurement = user.getMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate).get
-        retrievedMeasurement should equal(aMeasurement)
+        val eitherRetrievedMeasurement: Either[DayError, Option[Measurement]] =
+          user.getMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate)
+        eitherRetrievedMeasurement
+          .right
+          .get
+          .get should equal(aMeasurement)
       }
     }
 
@@ -36,15 +40,20 @@ class UserTest extends WordSpec with Matchers with BeforeAndAfterEach {
       }
 
       "throw an exception if we want a measurement for a day that does not exist" in {
-        assertThrows[DayDoesNotExistException] {
-          user.getMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate)
-        }
+        user
+          .getMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate)
+          .left
+          .get should equal(DayWithDateDoesNotExistError(aMeasurement.date.toLocalDate))
       }
 
       "retrieve the correct measurement if it exists" in {
         user.addMeasurement(aMeasurement)
-        val retrievedMeasurement = user.getMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate).get
-        retrievedMeasurement should equal(aMeasurement)
+
+        user
+          .getMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate)
+          .right
+          .get
+          .get should equal(aMeasurement)
       }
     }
 

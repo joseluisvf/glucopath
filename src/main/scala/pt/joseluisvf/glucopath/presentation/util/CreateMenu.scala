@@ -2,28 +2,33 @@ package pt.joseluisvf.glucopath.presentation.util
 
 import java.time.LocalDateTime
 
-import measurement.{MeasurementProto, UserProto}
+import measurement.{DiabeticProfileProto, MeasurementProto, UserProto}
 import pt.joseluisvf.glucopath.domain.measurement.BeforeOrAfterMeal.BeforeOrAfterMeal
 import pt.joseluisvf.glucopath.domain.measurement.WarningLevel.WarningLevel
 import pt.joseluisvf.glucopath.domain.measurement.{BeforeOrAfterMeal, Measurement, WarningLevel}
 import pt.joseluisvf.glucopath.domain.user.User
 import pt.joseluisvf.glucopath.domain.util.DateParser
+import pt.joseluisvf.glucopath.exception.DiabeticProfileError
 import pt.joseluisvf.glucopath.service.impl.UserServiceImpl
 import pt.joseluisvf.glucopath.service.mapper.{MeasurementMapperImpl, UserMapperImpl}
 
-object MeasurementMenu extends GlucopathMenu {
+object CreateMenu extends GlucopathMenu {
   private val OPTION_1 = "1"
   private val OPTION_1_TEXT = "Add Measurement"
   private val OPTION_2 = "2"
   private val OPTION_2_TEXT = "Calculate Insulin to Administer"
+  private val OPTION_3 = "3"
+  private val OPTION_3_TEXT = "Alter Diabetic Profile"
+
 
   override protected var availableOptions: String =
     DisplayOptions.getSmallSeparator +
-      "Measurement Menu:\n" +
+      "Create Menu:\n" +
       DisplayOptions.getSmallSeparator +
       s"$OPTION_0 - $OPTION_0_TEXT\n" +
       s"$OPTION_1 - $OPTION_1_TEXT\n" +
       s"$OPTION_2 - $OPTION_2_TEXT\n" +
+      s"$OPTION_3 - $OPTION_3_TEXT\n" +
       DisplayOptions.getSeparator + "\n"
 
   override protected def executeOption(option: String): Boolean = {
@@ -36,6 +41,14 @@ object MeasurementMenu extends GlucopathMenu {
       }
         println(DisplayOptions.getSeparator)
         true
+
+      case OPTION_3 => alterDiabeticProfile() match {
+        case Some(u) => updateUser(u)
+        case _ =>
+      }
+        println(DisplayOptions.getSeparator)
+        true
+
       case _ => println("Invalid Option; please pick again"); true
     }
   }
@@ -131,7 +144,6 @@ object MeasurementMenu extends GlucopathMenu {
             null
         }
       }
-
     }
     beforeOrAfterMeal
   }
@@ -163,7 +175,7 @@ object MeasurementMenu extends GlucopathMenu {
 
     println(s"Given the collected data and your diabetic profile, we recommend you administer\n$insulinToAdminister units of insulin.\n" +
       s"Would you like to create a measurement based on this?")
-    // check whether the user wants to create a measurement based on this
+
     val userChoiceCreateMeasurement = requestChoiceFromUser("Y/N\n(press enter for default - yes)")
     userChoiceCreateMeasurement.toUpperCase() match {
       case "" | "Y" =>
@@ -187,5 +199,27 @@ object MeasurementMenu extends GlucopathMenu {
     val warningLevel = getWarningLevel
 
     Measurement(glucoseMeasured, date, beforeOrAfterMeal, whatWasEaten, carbohydratesConsumed, insulinToAdminister, comments, warningLevel)
+  }
+
+  def alterDiabeticProfile(): Option[User] = {
+    val glucoseMitigationPerInsulinUnit: Int = getNonNegativeMeasurement("glucose mitigation")
+    val minimumGlucoseRange: Int = getNonNegativeMeasurement("minimum glucose")
+    val maximumGlucoseRange: Int = getNonNegativeMeasurement("maximum glucose")
+    println("Carbohydrate mitigation per insulin unit (in grams)?\ne.g. 1 unit of insulin mitigates 12 gr of carbohydrates")
+    val carbohydrateMitigation = getNonNegativeMeasurement("carbohydrate mitigation?")
+
+    val newDiabeticProfileProto: DiabeticProfileProto =
+      DiabeticProfileProto(
+        glucoseMitigationPerInsulinUnit,
+        minimumGlucoseRange,
+        maximumGlucoseRange,
+        carbohydrateMitigation)
+
+    val userProto: UserProto = UserMapperImpl.toProto(user)
+    val eitherAltereredUser: Either[DiabeticProfileError, UserProto] = UserServiceImpl.alterDiabeticProfile(userProto, newDiabeticProfileProto)
+    eitherAltereredUser match {
+      case Left(error) => ErrorHandler.displayErrorMessage(error.reason); None
+      case Right(u) => Some(UserMapperImpl.toEntity(u))
+    }
   }
 }

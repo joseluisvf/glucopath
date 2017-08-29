@@ -1,6 +1,7 @@
 package pt.joseluisvf.glucopath.service
 
-import measurement.{DayProto, MeasurementProto, UserProto}
+import measurement.{DayProto, DiabeticProfileProto, MeasurementProto, UserProto}
+import pt.joseluisvf.glucopath.exception.DiabeticProfileError
 
 trait UserService {
   def addMeasurement(userProto: UserProto, measurementProto: MeasurementProto): UserProto
@@ -10,4 +11,5 @@ trait UserService {
   def exportMeasurements(userProto: UserProto): Unit
   def showMetricsPerTimePeriod(userProto: UserProto): String
   def writeMetricsPerTimePeriod(userProto: UserProto): Unit
+  def alterDiabeticProfile(userProto: UserProto, diabeticProfileProto: DiabeticProfileProto): Either[DiabeticProfileError, UserProto]
 }

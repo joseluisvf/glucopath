@@ -1,12 +1,13 @@
 package pt.joseluisvf.glucopath.service.impl
 
-import measurement.{DayProto, MeasurementProto, UserProto}
+import measurement.{DayProto, DiabeticProfileProto, MeasurementProto, UserProto}
 import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
 import pt.joseluisvf.glucopath.domain.user.{User, UserStatistics}
 import pt.joseluisvf.glucopath.domain.util.DateParser
+import pt.joseluisvf.glucopath.exception.DiabeticProfileError
 import pt.joseluisvf.glucopath.persistence.GlucopathIO
 import pt.joseluisvf.glucopath.service.UserService
-import pt.joseluisvf.glucopath.service.mapper.{DayMapperImpl, MeasurementMapperImpl, UserMapperImpl}
+import pt.joseluisvf.glucopath.service.mapper.{DayMapperImpl, DiabeticProfileMapperImpl, MeasurementMapperImpl, UserMapperImpl}
 
 object UserServiceImpl extends UserService {
   override def addMeasurement(userProto: UserProto, measurementProto: MeasurementProto): UserProto = {
@@ -67,5 +68,30 @@ object UserServiceImpl extends UserService {
     val user: User = UserMapperImpl.toEntity(userProto)
     val metricsAsCsv = UserStatistics.getMetricsAsCsv(user)
     GlucopathIO.saveMetricsToFile(metricsAsCsv)
+  }
+
+  override def alterDiabeticProfile(
+                                     userProto: UserProto,
+                                     diabeticProfileProto: DiabeticProfileProto): Either[DiabeticProfileError, UserProto] = {
+    // TODO here when we cannot create an entity it will launch an exception. we must catch it and return NONE.
+    // but if so the program will silently crash. We could identity the None at the presentation layer and then inform
+    // the user that the process did not go well. But the user would not know why. In that case we can instead return
+    // an Either[UserProto, GlucopathException] and then we could at the presentation layer extract the accurate message.
+    val user: User = UserMapperImpl.toEntity(userProto)
+    try {
+    val newDiabeticProfile = DiabeticProfileMapperImpl.toEntity(diabeticProfileProto)
+
+    user.alterDiabeticProfile(newDiabeticProfile)
+
+    saveUserToFile(user)
+    Right(UserMapperImpl.toProto(user))
+    } catch {
+      // TODO corrigir isto
+      case iae: IllegalArgumentException =>
+        Left(null)
+      case _ =>
+        val x = 2
+        Left(null)
+    }
   }
 }

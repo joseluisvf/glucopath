@@ -6,7 +6,7 @@ import pt.joseluisvf.glucopath.domain.user.User
 import pt.joseluisvf.glucopath.service.impl.UserServiceImpl
 import pt.joseluisvf.glucopath.service.mapper.UserMapperImpl
 
-object FilesMenu extends GlucopathMenu{
+object PersistMenu extends GlucopathMenu{
   val OPTION_1 = "1"
   val OPTION_1_TEXT = "Import measurements from CSV file"
   val OPTION_2 = "2"
@@ -16,7 +16,7 @@ object FilesMenu extends GlucopathMenu{
 
   override protected var availableOptions: String =
     DisplayOptions.getSmallSeparator +
-      "Files Menu:\n" +
+      "Persist Menu:\n" +
       DisplayOptions.getSmallSeparator +
       s"$OPTION_0 - $OPTION_0_TEXT\n" +
       s"$OPTION_1 - $OPTION_1_TEXT\n" +
