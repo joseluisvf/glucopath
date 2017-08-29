@@ -6,7 +6,7 @@ import pt.joseluisvf.glucopath.domain.user.User
 import pt.joseluisvf.glucopath.service.impl.UserServiceImpl
 import pt.joseluisvf.glucopath.service.mapper.UserMapperImpl
 
-object FilesMenu extends GlucopathMenu{
+object PersistMenu extends GlucopathMenu{
   val OPTION_1 = "1"
   val OPTION_1_TEXT = "Import measurements from CSV file"
   val OPTION_2 = "2"
@@ -16,7 +16,7 @@ object FilesMenu extends GlucopathMenu{
 
   override protected var availableOptions: String =
     DisplayOptions.getSmallSeparator +
-      "Files Menu:\n" +
+      "Persist Menu:\n" +
       DisplayOptions.getSmallSeparator +
       s"$OPTION_0 - $OPTION_0_TEXT\n" +
       s"$OPTION_1 - $OPTION_1_TEXT\n" +
@@ -35,36 +35,36 @@ object FilesMenu extends GlucopathMenu{
         println(DisplayOptions.getSeparator); true
       case OPTION_2 => exportMeasurementsToFile(); println(DisplayOptions.getSeparator); true
       case OPTION_3 => exportMetricsToFile(); println(DisplayOptions.getSeparator); true
-      case _ => println("Invalid Option; please pick again"); true
+      case _ => UserFeedbackHandler.displayErrorMessage("Invalid Option; please pick again"); true
     }
   }
 
   def importMeasurementsFromCsvFile(): Option[User] = {
     val pathToFile = requestChoiceFromUser("Absolute path to CSV file?")
-    println("Importing measurements...")
+    UserFeedbackHandler.displayInformationalMessage("Importing measurements...")
     try {
       val constructedUser: User = FileMeasurementsLoader.importMeasurementsFrom(pathToFile, user)
       UserServiceImpl.saveUserToFile(constructedUser)
-      println("Measurements imported with success. User state has been saved.")
+      UserFeedbackHandler.displaySuccessMessage("Measurements imported with success. User state has been saved.")
       Some(constructedUser)
     } catch {
       case _: FileNotFoundException =>
-        ErrorHandler.displayErrorMessage(s"The provided path <$pathToFile> does not correspond to an existing file")
+        UserFeedbackHandler.displayErrorMessage(s"The provided path <$pathToFile> does not correspond to an existing file")
         None
     }
   }
 
   def exportMeasurementsToFile(): Unit = {
     val userProto: UserProto = UserMapperImpl.toProto(user)
-    println("Exporting measurements...")
+    UserFeedbackHandler.displayInformationalMessage("Exporting measurements...")
     UserServiceImpl.exportMeasurements(userProto)
-    println("Measurements imported with success.")
+    UserFeedbackHandler.displaySuccessMessage("Measurements imported with success.")
   }
 
   def exportMetricsToFile(): Unit = {
     val userProto: UserProto = UserMapperImpl.toProto(user)
-    println("Exporting metrics...")
+    UserFeedbackHandler.displayInformationalMessage("Exporting metrics...")
     UserServiceImpl.writeMetricsPerTimePeriod(userProto)
-    println("Metrics imported with success.")
+    UserFeedbackHandler.displaySuccessMessage("Metrics imported with success.")
   }
 }

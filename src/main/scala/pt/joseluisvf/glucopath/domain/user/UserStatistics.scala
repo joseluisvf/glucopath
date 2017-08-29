@@ -279,8 +279,8 @@ object UserStatistics {
     var measurementInRangeCount = 0
 
     partialMeasurements.partialMeasurements.foreach {
-      case pm if user.diabeticProfile.isGlucoseHipoglicemia(pm.glucose) => hipoglicemiaCount += 1
-      case pm if user.diabeticProfile.isGlucoseHiperglicemia(pm.glucose) => hiperglicemiaCount += 1
+      case pm if user.diabeticProfile.isGlucoseHypoglycemia(pm.glucose) => hipoglicemiaCount += 1
+      case pm if user.diabeticProfile.isGlucoseHyperglycemia(pm.glucose) => hiperglicemiaCount += 1
       case _ => measurementInRangeCount += 1
     }
 

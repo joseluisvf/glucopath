@@ -1,12 +1,13 @@
 package pt.joseluisvf.glucopath.service.impl
 
-import measurement.{DayProto, MeasurementProto, UserProto}
+import measurement.{DayProto, DiabeticProfileProto, MeasurementProto, UserProto}
 import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
 import pt.joseluisvf.glucopath.domain.user.{User, UserStatistics}
 import pt.joseluisvf.glucopath.domain.util.DateParser
+import pt.joseluisvf.glucopath.exception.{DiabeticProfileError, DiabeticProfileException}
 import pt.joseluisvf.glucopath.persistence.GlucopathIO
 import pt.joseluisvf.glucopath.service.UserService
-import pt.joseluisvf.glucopath.service.mapper.{DayMapperImpl, MeasurementMapperImpl, UserMapperImpl}
+import pt.joseluisvf.glucopath.service.mapper.{DayMapperImpl, DiabeticProfileMapperImpl, MeasurementMapperImpl, UserMapperImpl}
 
 object UserServiceImpl extends UserService {
   override def addMeasurement(userProto: UserProto, measurementProto: MeasurementProto): UserProto = {
@@ -67,5 +68,21 @@ object UserServiceImpl extends UserService {
     val user: User = UserMapperImpl.toEntity(userProto)
     val metricsAsCsv = UserStatistics.getMetricsAsCsv(user)
     GlucopathIO.saveMetricsToFile(metricsAsCsv)
+  }
+
+  override def alterDiabeticProfile(
+                                     userProto: UserProto,
+                                     diabeticProfileProto: DiabeticProfileProto): Either[DiabeticProfileError, UserProto] = {
+    val user: User = UserMapperImpl.toEntity(userProto)
+    try {
+      val newDiabeticProfile = DiabeticProfileMapperImpl.toEntity(diabeticProfileProto)
+      user.alterDiabeticProfile(newDiabeticProfile)
+
+      saveUserToFile(user)
+      Right(UserMapperImpl.toProto(user))
+    } catch {
+      case dpe: DiabeticProfileException =>
+        Left(dpe.getGlucopathError.asInstanceOf[DiabeticProfileError])
+    }
   }
 }

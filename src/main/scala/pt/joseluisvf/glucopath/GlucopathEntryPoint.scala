@@ -3,14 +3,14 @@ package pt.joseluisvf.glucopath
 import pt.joseluisvf.glucopath.domain.day.Days
 import pt.joseluisvf.glucopath.domain.user.{DiabeticProfile, User}
 import pt.joseluisvf.glucopath.persistence.GlucopathIO
-import pt.joseluisvf.glucopath.presentation.util.{ErrorHandler, MainMenu}
+import pt.joseluisvf.glucopath.presentation.util.{MainMenu, UserFeedbackHandler}
 
 
 object GlucopathEntryPoint extends App {
   var adam: User = loadUserOrCreateNewOne()
   var optionSelected = ""
 
-  println(s"Welcome to Glucopath ${adam.name}\n\n")
+  UserFeedbackHandler.displayInformationalMessage(s"Welcome to Glucopath ${adam.name}\n")
 
   MainMenu.loopExecution(adam)
 
@@ -21,7 +21,7 @@ object GlucopathEntryPoint extends App {
     maybeUser match {
       case Some(u) => u
       case None =>
-        println("We could not find a file with user information.\nPlease answer the following questions in order to create a new user.")
+        UserFeedbackHandler.displayInformationalMessage("We could not find a file containing user information.\nPlease answer the following questions in order to create a new user.")
         val user: User = createUser()
         GlucopathIO.saveUserToFile(user)
         user
@@ -36,11 +36,11 @@ object GlucopathEntryPoint extends App {
   }
 
   def createDiabeticProfile(): DiabeticProfile = {
-    println("Glucose mitigation per insulin unit (in mg/dl)?\ne.g. 50mg/dl per 1 unit of insulin")
+    UserFeedbackHandler.displayInformationalMessage("Glucose mitigation per insulin unit (in mg/dl)?\ne.g. 50mg/dl per 1 unit of insulin")
     val glucoseMitigation = getNonNegativeMeasurement("glucose mitigation")
     val idealGlucoseRangeMinimum = getNonNegativeMeasurement("minimum glucose?")
     val idealGlucoseRangeMaximum = getNonNegativeMeasurement("maximum glucose?")
-    println("Carbohydrate mitigation per insulin unit (in grams)?\ne.g. 1 unit of insulin mitigates 12 gr of carbohydrates")
+    UserFeedbackHandler.displayInformationalMessage("Carbohydrate mitigation per insulin unit (in grams)?\ne.g. 1 unit of insulin mitigates 12 gr of carbohydrates")
     val carbohydrateMitigation = getNonNegativeMeasurement("carbohydrate mitigation?")
     DiabeticProfile(glucoseMitigation, (idealGlucoseRangeMinimum, idealGlucoseRangeMaximum), carbohydrateMitigation)
   }
@@ -50,7 +50,7 @@ object GlucopathEntryPoint extends App {
   }
 
   final private def requestChoiceFromUser(prompt: String): String = {
-    println(prompt)
+    UserFeedbackHandler.displayInformationalMessage(prompt)
     scala.io.StdIn.readLine()
 
   }
@@ -64,10 +64,10 @@ object GlucopathEntryPoint extends App {
         glucose = Integer.parseInt(glucoseOption)
         if (glucose < 0) {
           glucose = -1
-          ErrorHandler.displayErrorMessage(s"$kind value must be non-negative")
+          UserFeedbackHandler.displayErrorMessage(s"$kind value must be non-negative")
         }
       } catch {
-        case _: NumberFormatException => ErrorHandler.displayErrorMessage(s"Invalid $kind. Please try again.")
+        case _: NumberFormatException => UserFeedbackHandler.displayErrorMessage(s"Invalid $kind. Please try again.")
       }
     }
     glucose

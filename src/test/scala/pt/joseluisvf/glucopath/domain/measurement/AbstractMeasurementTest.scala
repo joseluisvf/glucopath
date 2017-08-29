@@ -7,8 +7,10 @@ import org.scalatest.{Matchers, WordSpec}
 import pt.joseluisvf.glucopath.domain.measurement
 import pt.joseluisvf.glucopath.domain.measurement.BeforeOrAfterMeal.BeforeOrAfterMeal
 import pt.joseluisvf.glucopath.domain.measurement.WarningLevel.WarningLevel
+import pt.joseluisvf.glucopath.exception.MeasurementException
 
 abstract class AbstractMeasurementTest extends WordSpec with Matchers {
+  var caught: MeasurementException = _
   protected val DEFAULT_GLUCOSE = 100
   protected val DEFAULT_DATE_TIME: LocalDateTime =
     LocalDateTime
