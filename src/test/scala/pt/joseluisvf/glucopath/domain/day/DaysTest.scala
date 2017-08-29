@@ -1,6 +1,7 @@
 package pt.joseluisvf.glucopath.domain.day
 
-import pt.joseluisvf.glucopath.exception.DayDoesNotExistException
+import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
+import pt.joseluisvf.glucopath.exception.{DayDoesNotExistException, DayError, DayWithDateDoesNotExistError}
 
 class DaysTest extends AbstractDayTest {
 
@@ -17,8 +18,9 @@ class DaysTest extends AbstractDayTest {
         days.addMeasurement(aMeasurement)
         days.days.size should equal(numberDaysBefore + 1)
 
-        val retrievedMeasurement = days.getMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate)
-        retrievedMeasurement should equal(Some(aMeasurement))
+        val eitherRetrievedMeasurement: Either[DayError, Option[Measurement]] =
+          days.getMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate)
+        eitherRetrievedMeasurement.right.get should equal(Some(aMeasurement))
 
         val maybeRetrievedDay = getDayByDate(days, aMeasurement.date.toLocalDate)
         maybeRetrievedDay shouldBe a[Some[_]]
@@ -63,29 +65,36 @@ class DaysTest extends AbstractDayTest {
     }
 
     "get measurement" should {
-      "throw an exception if we want a measurement for a day that does not exist" in {
-        assertThrows[DayDoesNotExistException] {
-          days.getMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate)
-        }
+      "throw an error if we want a measurement for a day that does not exist" in {
+
+        days
+          .getMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate)
+          .left
+          .get should equal(DayWithDateDoesNotExistError(aMeasurement.date.toLocalDate))
       }
 
       "retrieve the correct measurement if it exists" in {
         days.addMeasurement(aMeasurement)
-        val retrievedMeasurement = days.getMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate).get
-        retrievedMeasurement should equal(aMeasurement)
+        val eitherRetrievedMeasurement: Either[DayError, Option[Measurement]] =
+          days.getMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate)
+        eitherRetrievedMeasurement
+          .right
+          .get
+          .get should equal(aMeasurement)
       }
 
       "not do anything if we want a measurement that does not exist for a day that exists" in {
         days.addMeasurement(aMeasurement)
         days.removeMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate)
-        val retrievedMeasurements = days.removeMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate)
-        retrievedMeasurements.measurements.size should equal(0)
+        val retrievedMeasurements: Either[DayError, Measurements] =
+          days.removeMeasurement(aMeasurement.id, aMeasurement.date.toLocalDate)
+        retrievedMeasurements.right.get.measurements.size should equal(0)
       }
     }
 
     "get today measurements" should {
       "return no measurements if none exist" in {
-        val todayMeasurements = days.getTodayMeasurements
+        val todayMeasurements: Option[Measurements] = days.getTodayMeasurements
         todayMeasurements shouldBe None
       }
 
@@ -109,9 +118,12 @@ class DaysTest extends AbstractDayTest {
         today.measurements.measurements.size should equal(numberMeasurementsBeforeRemoval - 1)
       }
       "not do anything if a measurement does not exist" in {
-        assertThrows[DayDoesNotExistException] {
-          days.removeMeasurement(aMeasurementForToday.id, aMeasurementForToday.date.toLocalDate)
-        }
+
+        days
+          .removeMeasurement(aMeasurementForToday.id, aMeasurementForToday.date.toLocalDate)
+        .left
+        .get should equal (DayWithDateDoesNotExistError(aMeasurementForToday.date.toLocalDate))
+
       }
     }
 

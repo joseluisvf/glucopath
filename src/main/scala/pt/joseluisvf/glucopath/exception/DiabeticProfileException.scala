@@ -1,0 +1,3 @@
+package pt.joseluisvf.glucopath.exception
+
+class DiabeticProfileException(diabeticProfileError: DiabeticProfileError) extends GlucopathException(diabeticProfileError)

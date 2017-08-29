@@ -2,6 +2,8 @@ package pt.joseluisvf.glucopath.domain.measurement
 
 import java.time.LocalDateTime
 
+import pt.joseluisvf.glucopath.exception._
+
 class MeasurementTest extends AbstractMeasurementTest {
 
   "A Measurement" should {
@@ -22,23 +24,27 @@ class MeasurementTest extends AbstractMeasurementTest {
     }
 
     "not be allowed to have a negative glucose reading" in {
-      assertThrows[IllegalArgumentException] {
+      caught = intercept[MeasurementException] {
         Measurement(-1, DEFAULT_DATE_TIME, DEFAULT_BEFORE_OR_AFTER_MEAL, DEFAULT_WHAT_WAS_EATEN, DEFAULT_CARBOHYDRATES_EATEN, DEFAULT_INSULIN_ADMINISTERED, DEFAULT_COMMENTS)
       }
+
+      caught.getGlucopathError should equal(GlucoseOutsideBoundsError(-1))
     }
 
     "not be allowed to have a negative insuline administration" in {
-      assertThrows[IllegalArgumentException] {
+      caught = intercept[MeasurementException] {
         Measurement(DEFAULT_GLUCOSE, DEFAULT_DATE_TIME, DEFAULT_BEFORE_OR_AFTER_MEAL, DEFAULT_WHAT_WAS_EATEN, DEFAULT_CARBOHYDRATES_EATEN, -1, DEFAULT_COMMENTS)
       }
+
+      caught.getGlucopathError should equal(InsulinAdministeredOutsideBoundsError(-1))
     }
 
     "not be allowed to have a negative carbohydrate consumption" in {
-      assertThrows[IllegalArgumentException] {
+      caught = intercept[MeasurementException] {
         Measurement(DEFAULT_GLUCOSE, DEFAULT_DATE_TIME, DEFAULT_BEFORE_OR_AFTER_MEAL, DEFAULT_WHAT_WAS_EATEN, -1, DEFAULT_INSULIN_ADMINISTERED, DEFAULT_COMMENTS)
       }
+
+      caught.getGlucopathError should equal(CarbohydratesEatenInGramsOutsideBoundsError(-1))
     }
   }
-
-
 }

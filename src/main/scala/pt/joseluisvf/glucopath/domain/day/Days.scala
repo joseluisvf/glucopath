@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
-import pt.joseluisvf.glucopath.exception.DayDoesNotExistException
+import pt.joseluisvf.glucopath.exception.{DayError, DayWithDateDoesNotExistError}
 import pt.joseluisvf.glucopath.presentation.util.DisplayOptions
 
 import scala.collection.mutable.ListBuffer
@@ -30,12 +30,12 @@ case class Days(days: ListBuffer[Day] = ListBuffer.empty) {
 
   def getDayByDate(date: LocalDate): Option[Day] = days.find(_.date == date)
 
-  def getMeasurement(id: UUID, date: LocalDate): Option[Measurement] = {
+  def getMeasurement(id: UUID, date: LocalDate): Either[DayError, Option[Measurement]] = {
     val maybeDay = getDayByDate(date)
 
     maybeDay match {
-      case Some(day) => day.getMeasurement(id)
-      case _ => throw new DayDoesNotExistException(date)
+      case Some(day) => Right(day.getMeasurement(id))
+      case _ => Left(DayWithDateDoesNotExistError(date))
     }
   }
 
@@ -51,11 +51,11 @@ case class Days(days: ListBuffer[Day] = ListBuffer.empty) {
     }
   }
 
-  def removeMeasurement(id: UUID, date: LocalDate): Measurements = {
+  def removeMeasurement(id: UUID, date: LocalDate): Either[DayError, Measurements] = {
     val maybeDay = getDayByDate(date)
     maybeDay match {
-      case Some(day) => day.removeMeasurement(id)
-      case _ => throw new DayDoesNotExistException(date)
+      case Some(day) => Right(day.removeMeasurement(id))
+      case _ => Left(DayWithDateDoesNotExistError(date))
     }
   }
 
@@ -68,7 +68,7 @@ case class Days(days: ListBuffer[Day] = ListBuffer.empty) {
   }
 
   def aggregateDayStatistics: DayStatistics = {
-    days.foldLeft(DayStatistics()){
+    days.foldLeft(DayStatistics()) {
       (accum, item) => accum + item.dayStatistics
     }
   }

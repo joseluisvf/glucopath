@@ -1,26 +1,34 @@
 package pt.joseluisvf.glucopath.domain.user
 
+import pt.joseluisvf.glucopath.exception._
+
 case class DiabeticProfile(
-                     // e.g. one unit mitigates 50mg/dl glucose
-                       var glucoseMitigationPerInsulinUnit: Int,
-                     // e.g. [80 - 150]
-                       var idealGlucoseRange: (Int, Int),
-                     // e.g. one unit annuls 12gr carbs
-                       var carbohydrateMitigationPerInsulinUnit: Int) {
+                            // e.g. one unit mitigates 50mg/dl glucose
+                            var glucoseMitigationPerInsulinUnit: Int,
+                            // e.g. [80 - 150]
+                            var idealGlucoseRange: (Int, Int),
+                            // e.g. one unit annuls 12gr carbs
+                            var carbohydrateMitigationPerInsulinUnit: Int) {
 
-  require(glucoseMitigationPerInsulinUnit > 0, "glucose mitigation must be a positive number\ne.g. 50")
-  require(idealGlucoseRange._1 > 0, "the minimum range must be a positive number\ne.g. 80")
-  require(idealGlucoseRange._2 > 0, "the maximum range must be a positive number\ne.g. 150")
-  require(idealGlucoseRange._2 > idealGlucoseRange._1, "the maximum range must be higher than the minimum range")
-  require(carbohydrateMitigationPerInsulinUnit > 0, "carbohydrate mitigation must be a positive number\ne.g. 12")
+  require(isGlucoseMitigationWithinBounds,
+    throw new DiabeticProfileException(GlucoseMitigationOutsideReasonableBoundsError(glucoseMitigationPerInsulinUnit)))
 
+  require(idealGlucoseRange._1 > 0, throw new DiabeticProfileException(GlucoseRangeOutsideReasonableBoundsError(idealGlucoseRange)))
+
+  require(idealGlucoseRange._2 > 0, throw new DiabeticProfileException(GlucoseRangeOutsideReasonableBoundsError(idealGlucoseRange)))
+
+  require(idealGlucoseRange._2 > idealGlucoseRange._1,
+    throw new DiabeticProfileException(GlucoseRangeOutsideReasonableBoundsError(idealGlucoseRange)))
+
+  require(isCarbohydrateMitigationWithinBounds,
+    throw new DiabeticProfileException(CarbohydrateMitigationOutsideReasonableBoundsError(carbohydrateMitigationPerInsulinUnit)))
 
   def calculateHowMuchInsulinToAdminister(glucoseMeasured: Int, carbohydratesConsumed: Int): Int = {
     val glucoseGoal: Int = (idealGlucoseRange._1 + idealGlucoseRange._2) / 2
 
     val insulinUnitsRequiredForGoal =
       if (glucoseMeasured < glucoseGoal) {
-        // try to compensate by providing a negative value
+        // try to compensate cby providing a negative value
         Math.ceil((glucoseMeasured - glucoseGoal).asInstanceOf[Float] / glucoseMitigationPerInsulinUnit)
       } else {
         (glucoseMeasured - glucoseGoal).asInstanceOf[Float] / glucoseMitigationPerInsulinUnit
@@ -38,7 +46,24 @@ case class DiabeticProfile(
   val minGlucoseRange: Int = idealGlucoseRange._1
   val maxGlucoseRange: Int = idealGlucoseRange._2
 
-  def isGlucoseHipoglicemia(glucose: Int): Boolean = glucose <= minGlucoseRange
-  def isGlucoseHiperglicemia(glucose: Int): Boolean = glucose >= maxGlucoseRange
+  def isGlucoseHypoglycemia(glucose: Int): Boolean = glucose <= minGlucoseRange
+
+  def isGlucoseHyperglycemia(glucose: Int): Boolean = glucose >= maxGlucoseRange
+
   def isGlucoseInRange(glucose: Int): Boolean = minGlucoseRange < glucose && glucose < maxGlucoseRange
+
+  private def isGlucoseMitigationWithinBounds: Boolean =
+    DiabeticProfile.MINIMUM_GLUCOSE_MITIGATION <= glucoseMitigationPerInsulinUnit &&
+      glucoseMitigationPerInsulinUnit <= DiabeticProfile.MAXIMUM_GLUCOSE_MITIGATION
+
+  private def isCarbohydrateMitigationWithinBounds: Boolean =
+    DiabeticProfile.MINIMUM_CARBOHYDRATE_MITIGATION_PER_INSULIN_UNIT <= carbohydrateMitigationPerInsulinUnit &&
+      carbohydrateMitigationPerInsulinUnit <= DiabeticProfile.MAXIMUM_CARBOHYDRATE_MITIGATION_PER_INSULIN_UNIT
+}
+
+case object DiabeticProfile {
+  val MINIMUM_GLUCOSE_MITIGATION: Int = 0
+  val MAXIMUM_GLUCOSE_MITIGATION: Int = 200
+  val MINIMUM_CARBOHYDRATE_MITIGATION_PER_INSULIN_UNIT: Int = 0
+  val MAXIMUM_CARBOHYDRATE_MITIGATION_PER_INSULIN_UNIT: Int = 50
 }
