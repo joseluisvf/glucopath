@@ -49,7 +49,7 @@ object CreateMenu extends GlucopathMenu {
         println(DisplayOptions.getSeparator)
         true
 
-      case _ => println("Invalid Option; please pick again"); true
+      case _ => UserFeedbackHandler.displayInformationalMessage("Invalid Option; please pick again"); true
     }
   }
 
@@ -64,6 +64,7 @@ object CreateMenu extends GlucopathMenu {
 
     userProto = UserServiceImpl.addMeasurement(userProto, measurementProto)
 
+    UserFeedbackHandler.displaySuccessMessage("Measurement added with success!")
     UserMapperImpl.toEntity(userProto)
   }
 
@@ -97,10 +98,10 @@ object CreateMenu extends GlucopathMenu {
         glucose = Integer.parseInt(glucoseOption)
         if (glucose < 0) {
           glucose = -1
-          ErrorHandler.displayErrorMessage(s"$kind value must be non-negative")
+          UserFeedbackHandler.displayErrorMessage(s"$kind value must be non-negative")
         }
       } catch {
-        case _: NumberFormatException => ErrorHandler.displayErrorMessage(s"Invalid $kind. Please try again.")
+        case _: NumberFormatException => UserFeedbackHandler.displayErrorMessage(s"Invalid $kind. Please try again.")
       }
     }
     glucose
@@ -119,7 +120,7 @@ object CreateMenu extends GlucopathMenu {
           date = DateParser.toLocalDateTimeFromUserInput(dateOption)
         } catch {
           case e: Exception =>
-            ErrorHandler.displayErrorMessage(s"Invalid date format!\n ${e.getMessage}\n")
+            UserFeedbackHandler.displayErrorMessage(s"Invalid date format!\n ${e.getMessage}\n")
             dateOption = ""
         }
       }
@@ -140,7 +141,7 @@ object CreateMenu extends GlucopathMenu {
           case "b" => BeforeOrAfterMeal.BEFORE_MEAL
           case "a" => BeforeOrAfterMeal.AFTER_MEAL
           case _ =>
-            ErrorHandler.displayErrorMessage("before or after meal must be either b or a.")
+            UserFeedbackHandler.displayErrorMessage("before or after meal must be either b or a.")
             null
         }
       }
@@ -161,7 +162,7 @@ object CreateMenu extends GlucopathMenu {
           warningLevel = WarningLevel.withName(warningLevelOption.toUpperCase())
         } catch {
           case _: Exception =>
-            ErrorHandler.displayErrorMessage("Invalid warning level")
+            UserFeedbackHandler.displayErrorMessage("Invalid warning level")
         }
       }
     }
@@ -173,7 +174,7 @@ object CreateMenu extends GlucopathMenu {
     val carbohydratesConsumed = getNonNegativeMeasurement("carbohydrates consumed (grams)")
     val insulinToAdminister = user.calculateHowMuchInsulinToAdminister(glucoseMeasured, carbohydratesConsumed)
 
-    println(s"Given the collected data and your diabetic profile, we recommend you administer\n$insulinToAdminister units of insulin.\n" +
+    UserFeedbackHandler.displayInformationalMessage(s"Given the collected data and your diabetic profile, we recommend you administer\n$insulinToAdminister units of insulin.\n" +
       s"Would you like to create a measurement based on this?")
 
     val userChoiceCreateMeasurement = requestChoiceFromUser("Y/N\n(press enter for default - yes)")
@@ -181,7 +182,7 @@ object CreateMenu extends GlucopathMenu {
       case "" | "Y" =>
         val toAdd: Measurement = collectPartialMeasurementFromUser(glucoseMeasured, carbohydratesConsumed, insulinToAdminister)
         val modifiedUser: User = addMeasurement(toAdd)
-        println("Measurement added with success.")
+        UserFeedbackHandler.displaySuccessMessage("Measurement added with success.")
         Some(modifiedUser)
       case _ => None
     }
@@ -217,9 +218,10 @@ object CreateMenu extends GlucopathMenu {
 
     val userProto: UserProto = UserMapperImpl.toProto(user)
     val eitherAltereredUser: Either[DiabeticProfileError, UserProto] = UserServiceImpl.alterDiabeticProfile(userProto, newDiabeticProfileProto)
+
     eitherAltereredUser match {
-      case Left(error) => ErrorHandler.displayErrorMessage(error.reason); None
-      case Right(u) => Some(UserMapperImpl.toEntity(u))
+      case Left(error) => UserFeedbackHandler.displayErrorMessage(error.reason); None
+      case Right(u) => UserFeedbackHandler.displaySuccessMessage("Diabetic Profile altered with success!");Some(UserMapperImpl.toEntity(u));
     }
   }
 }

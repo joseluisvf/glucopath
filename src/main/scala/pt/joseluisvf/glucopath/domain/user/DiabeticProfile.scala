@@ -58,7 +58,7 @@ case class DiabeticProfile(
 
   private def isCarbohydrateMitigationWithinBounds: Boolean =
     DiabeticProfile.MINIMUM_CARBOHYDRATE_MITIGATION_PER_INSULIN_UNIT <= carbohydrateMitigationPerInsulinUnit &&
-      glucoseMitigationPerInsulinUnit <= DiabeticProfile.MAXIMUM_CARBOHYDRATE_MITIGATION_PER_INSULIN_UNIT
+      carbohydrateMitigationPerInsulinUnit <= DiabeticProfile.MAXIMUM_CARBOHYDRATE_MITIGATION_PER_INSULIN_UNIT
 }
 
 case object DiabeticProfile {

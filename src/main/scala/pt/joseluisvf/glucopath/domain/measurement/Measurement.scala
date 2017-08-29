@@ -29,7 +29,7 @@ trait Measurement {
   require(isGlucoseWithinBounds, throw new MeasurementException(GlucoseOutsideBoundsError(glucose)))
   require(isInsulinWithinBounds, throw new MeasurementException(InsulinAdministeredOutsideBoundsError(insulinAdministered)))
   require(isCarbohydratesEatenInGramsWithinBounds, throw new MeasurementException(CarbohydratesEatenInGramsOutsideBoundsError(carbohydratesEatenInGrams)))
-git st
+
   override def toString: String =
     s"Measurement(glucose = $glucose, date = $date, beforeOrAfterMeal = $beforeOrAfterMeal\n" +
       s" whatWasEaten = $whatWasEaten, carbohydratesEatenInGrams = $carbohydratesEatenInGrams, insulinAdministered = $insulinAdministered\n" +
@@ -46,7 +46,6 @@ git st
   private def isCarbohydratesEatenInGramsWithinBounds: Boolean =
     Measurement.MINIMUM_CARBOHYDRATES_EATEN_IN_GRAMS <= carbohydratesEatenInGrams &&
       carbohydratesEatenInGrams <= Measurement.MAXIMUM_CARBOHYDRATES_EATEN_IN_GRAMS
-
 }
 
 object Measurement {

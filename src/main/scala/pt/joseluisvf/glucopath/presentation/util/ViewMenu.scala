@@ -39,7 +39,7 @@ object ViewMenu extends GlucopathMenu {
       case OPTION_3 => viewAllMeasurements(); println(DisplayOptions.getSeparator); true
       case OPTION_4 => showOverallInfo(); println(DisplayOptions.getSeparator); true
       case OPTION_5 => showMetricsPerTimePeriod(); println(DisplayOptions.getSeparator); true
-      case _ => println("Invalid Option; please pick again"); true
+      case _ => UserFeedbackHandler.displayErrorMessage("Invalid Option; please pick again"); true
     }
   }
 
@@ -50,11 +50,11 @@ object ViewMenu extends GlucopathMenu {
 
     maybeTodayProto match {
       case Some(d) =>
-        println(s"Here are the measurements for today (${LocalDate.now}):\n")
+        UserFeedbackHandler.displaySuccessMessage(s"Here are the measurements for today (${LocalDate.now}):\n")
         val today = DayMapperImpl.toEntity(d)
         println(today)
       case _ =>
-        ErrorHandler.displayErrorMessage(s"No measurements were found for today(${LocalDate.now}).")
+        UserFeedbackHandler.displayErrorMessage(s"No measurements were found for today(${LocalDate.now}).")
     }
   }
 
@@ -65,11 +65,11 @@ object ViewMenu extends GlucopathMenu {
 
     maybeTodayProto match {
       case Some(d) =>
-        println(s"Here are the measurements for the date ($desiredDate):\n")
+        UserFeedbackHandler.displaySuccessMessage(s"Here are the measurements for the date ($desiredDate):\n")
         val today = DayMapperImpl.toEntity(d)
         println(today)
       case _ =>
-        ErrorHandler.displayErrorMessage(s"No measurements were found for the date($desiredDate).")
+        UserFeedbackHandler.displayErrorMessage(s"No measurements were found for the date($desiredDate).")
     }
   }
 

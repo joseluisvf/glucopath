@@ -26,12 +26,12 @@ trait GlucopathMenu {
   }
 
   final def requestChoiceFromUser(): String = {
-    println("Please pick an option")
+    UserFeedbackHandler.displayInformationalMessage("Please pick an option")
     scala.io.StdIn.readLine()
   }
 
   final def requestChoiceFromUser(prompt: String): String = {
-    println(prompt)
+    UserFeedbackHandler.displayInformationalMessage(prompt)
     scala.io.StdIn.readLine()
 
   }
@@ -46,7 +46,7 @@ trait GlucopathMenu {
         date = DateParser.toLocalDateFromUserInput(dateOption)
       } catch {
         case e: Exception =>
-          ErrorHandler.displayErrorMessage(s"Invalid date format!\n ${e.getMessage}\n")
+          UserFeedbackHandler.displayErrorMessage(s"Invalid date format!\n ${e.getMessage}\n")
           dateOption = ""
       }
     }

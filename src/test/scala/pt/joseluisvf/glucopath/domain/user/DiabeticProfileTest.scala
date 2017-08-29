@@ -45,6 +45,12 @@ class DiabeticProfileTest extends WordSpec with Matchers {
       }
 
       caught.getGlucopathError should equal(GlucoseRangeOutsideReasonableBoundsError((200, 150)))
+
+      caught = intercept[DiabeticProfileException] {
+        diabeticProfile = DiabeticProfile(50, (80, 150), 900)
+      }
+
+      caught.getGlucopathError should equal(CarbohydrateMitigationOutsideReasonableBoundsError(900))
     }
 
     "calculateHowMuchInsulinToAdminister" should {
