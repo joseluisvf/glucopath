@@ -50,7 +50,7 @@ object ViewMenu extends GlucopathMenu {
 
     maybeTodayProto match {
       case Some(d) =>
-        UserFeedbackHandler.displaySuccessMessage(s"Here are the measurements for today (${LocalDate.now}):\n")
+        UserFeedbackHandler.displaySuccessMessage(s"Here are the measurements for today (${LocalDate.now}):")
         val today = DayMapperImpl.toEntity(d)
         println(today)
       case _ =>
@@ -65,7 +65,7 @@ object ViewMenu extends GlucopathMenu {
 
     maybeTodayProto match {
       case Some(d) =>
-        UserFeedbackHandler.displaySuccessMessage(s"Here are the measurements for the date ($desiredDate):\n")
+        UserFeedbackHandler.displaySuccessMessage(s"Here are the measurements for the date ($desiredDate):")
         val today = DayMapperImpl.toEntity(d)
         println(today)
       case _ =>

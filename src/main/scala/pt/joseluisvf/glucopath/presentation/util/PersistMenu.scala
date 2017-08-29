@@ -58,13 +58,13 @@ object PersistMenu extends GlucopathMenu{
     val userProto: UserProto = UserMapperImpl.toProto(user)
     UserFeedbackHandler.displayInformationalMessage("Exporting measurements...")
     UserServiceImpl.exportMeasurements(userProto)
-    UserFeedbackHandler.displaySuccessMessage("Measurements imported with success.")
+    UserFeedbackHandler.displaySuccessMessage("Measurements exported with success.")
   }
 
   def exportMetricsToFile(): Unit = {
     val userProto: UserProto = UserMapperImpl.toProto(user)
     UserFeedbackHandler.displayInformationalMessage("Exporting metrics...")
     UserServiceImpl.writeMetricsPerTimePeriod(userProto)
-    UserFeedbackHandler.displaySuccessMessage("Metrics imported with success.")
+    UserFeedbackHandler.displaySuccessMessage("Metrics exported with success.")
   }
 }

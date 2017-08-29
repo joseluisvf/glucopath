@@ -1,6 +1,6 @@
 package pt.joseluisvf.glucopath.domain.day
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
@@ -75,5 +75,15 @@ case class Days(days: ListBuffer[Day] = ListBuffer.empty) {
 
   override def toString: String = {
     s"Days:\n${days.map(_.toString()).mkString(DisplayOptions.getSeparator)}"
+  }
+
+  def alterSlowInsulin(slowInsulin: SlowInsulin, localDateTime: LocalDateTime): Any = {
+    getDayByDate(localDateTime.toLocalDate) match {
+      case Some(day) => day.slowInsulin(slowInsulin)
+      case _ =>
+        val newDay = Day(localDateTime.toLocalDate)
+        newDay.slowInsulin(slowInsulin)
+        this.addDay(newDay)
+    }
   }
 }

@@ -1,5 +1,4 @@
 package pt.joseluisvf.glucopath.service.mapper
-import java.time.LocalDate
 import java.util.UUID
 
 import measurement.DayProto
@@ -15,7 +14,12 @@ object DayMapperImpl extends DayMapper {
     val date = DateParser.toLocalDate(proto.date)
     val id = UUID.fromString(proto.id)
 
-    Day(dayStatistics, measurements, date, id)
+    val result: Day = Day(dayStatistics, measurements, date, id)
+
+    proto.slowInsulin match {
+      case Some(slowProto) => result.slowInsulin(SlowInsulinMapperImpl.toEntity(slowProto))
+      case _ => result
+    }
   }
 
   override def toProto(entity: Day): DayProto = {
@@ -24,7 +28,14 @@ object DayMapperImpl extends DayMapper {
     val date = DateParser.localDateToString(entity.date)
     val id = entity.id.toString
 
-    DayProto(dayStatistics, measurements, date, id)
+    val result: DayProto = DayProto(dayStatistics, measurements, date, id)
+
+    if (!entity.slowInsulin.isDefault) {
+      val slowInsulinProto = SlowInsulinMapperImpl.toProto(entity.slowInsulin)
+      result.withSlowInsulin(slowInsulinProto)
+    } else {
+      result
+    }
   }
 
   override def toEntities(protos: ListBuffer[DayProto]): ListBuffer[Day] = {

@@ -1,13 +1,16 @@
 package pt.joseluisvf.glucopath.service.impl
 
-import measurement.{DayProto, DiabeticProfileProto, MeasurementProto, UserProto}
+import java.time.LocalDateTime
+
+import measurement._
+import pt.joseluisvf.glucopath.domain.day.SlowInsulin
 import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
 import pt.joseluisvf.glucopath.domain.user.{User, UserStatistics}
 import pt.joseluisvf.glucopath.domain.util.DateParser
-import pt.joseluisvf.glucopath.exception.{DiabeticProfileError, DiabeticProfileException}
+import pt.joseluisvf.glucopath.exception.{DiabeticProfileError, DiabeticProfileException, SlowInsulinError, SlowInsulinException}
 import pt.joseluisvf.glucopath.persistence.GlucopathIO
 import pt.joseluisvf.glucopath.service.UserService
-import pt.joseluisvf.glucopath.service.mapper.{DayMapperImpl, DiabeticProfileMapperImpl, MeasurementMapperImpl, UserMapperImpl}
+import pt.joseluisvf.glucopath.service.mapper._
 
 object UserServiceImpl extends UserService {
   override def addMeasurement(userProto: UserProto, measurementProto: MeasurementProto): UserProto = {
@@ -83,6 +86,23 @@ object UserServiceImpl extends UserService {
     } catch {
       case dpe: DiabeticProfileException =>
         Left(dpe.getGlucopathError.asInstanceOf[DiabeticProfileError])
+    }
+  }
+
+  override def alterSlowInsulin(
+                                 userProto: UserProto,
+                                 slowInsulinProto: SlowInsulinProto,
+                                 localDateTime: LocalDateTime): Either[SlowInsulinError, UserProto] = {
+    val user: User = UserMapperImpl.toEntity(userProto)
+
+    try {
+      val slowInsulin: SlowInsulin = SlowInsulinMapperImpl.toEntity(slowInsulinProto)
+      user.alterSlowInsulin(slowInsulin, localDateTime)
+      saveUserToFile(user)
+      Right(UserMapperImpl.toProto(user))
+    } catch {
+      case sie: SlowInsulinException =>
+        Left(sie.getGlucopathError.asInstanceOf[SlowInsulinError])
     }
   }
 }

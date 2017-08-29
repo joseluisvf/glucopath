@@ -1,7 +1,9 @@
 package pt.joseluisvf.glucopath.service
 
-import measurement.{DayProto, DiabeticProfileProto, MeasurementProto, UserProto}
-import pt.joseluisvf.glucopath.exception.DiabeticProfileError
+import java.time.LocalDateTime
+
+import measurement._
+import pt.joseluisvf.glucopath.exception.{DiabeticProfileError, SlowInsulinError}
 
 trait UserService {
   def addMeasurement(userProto: UserProto, measurementProto: MeasurementProto): UserProto
@@ -12,4 +14,5 @@ trait UserService {
   def showMetricsPerTimePeriod(userProto: UserProto): String
   def writeMetricsPerTimePeriod(userProto: UserProto): Unit
   def alterDiabeticProfile(userProto: UserProto, diabeticProfileProto: DiabeticProfileProto): Either[DiabeticProfileError, UserProto]
+  def alterSlowInsulin(userProto: UserProto, slowInsulinProto: SlowInsulinProto, localDateTime: LocalDateTime): Either[SlowInsulinError, UserProto]
 }
