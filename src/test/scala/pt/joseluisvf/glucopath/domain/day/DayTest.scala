@@ -1,5 +1,6 @@
 package pt.joseluisvf.glucopath.domain.day
 
+import java.time.LocalTime
 import java.util.UUID
 
 import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
@@ -15,6 +16,18 @@ class DayTest extends AbstractDayTest {
   }
 
   "A Day" should {
+    "slow insulin" should {
+      "be initialized with the default slow insulin" in {
+        day.slowInsulin.isDefault should equal(true)
+      }
+
+      "be able to be modified" in {
+        val slowInsulin: SlowInsulin = SlowInsulin(LocalTime.of(14, 15), 32)
+        day.slowInsulin_(slowInsulin).slowInsulin should equal(slowInsulin)
+      }
+    }
+
+
     "Add Measurement" should {
       "Add a measurement" in {
         val sizeBefore = day.measurements.measurements.size
@@ -44,12 +57,12 @@ class DayTest extends AbstractDayTest {
     "Get Measurement" should {
       "Get an existing measurement" in {
         val retrievedMeasurement = day.getMeasurement(aMeasurement.id)
-        retrievedMeasurement should equal (Some(aMeasurement))
+        retrievedMeasurement should equal(Some(aMeasurement))
       }
 
       "Not get an non-existing measurement" in {
         val retrievedMeasurement = day.getMeasurement(UUID.randomUUID())
-        retrievedMeasurement should equal (None)
+        retrievedMeasurement should equal(None)
       }
     }
 
@@ -92,6 +105,44 @@ class DayTest extends AbstractDayTest {
         day.removeMeasurement(UUID.randomUUID())
         day.measurements.measurements.size should equal(sizeBefore)
       }
+    }
+
+    "to string" should {
+      "show everything if the non default slow insulin is used" in {
+        val dayWithSlowInsulin: Day = day.slowInsulin_(SlowInsulin(LocalTime.of(14, 15), 20))
+        val result = dayWithSlowInsulin.toString
+
+        result.contains("SlowInsulin") should equal(true)
+      }
+
+      "show everything except for slow insulin if the default slow insulin is used" in {
+        val result = day.toString
+
+        result.contains("SlowInsulin") should equal(false)
+      }
+    }
+
+    "Day Statistics" should {
+
+      "+" should {
+        "work correctly with another day statistics" in {
+          val dayStatistics: DayStatistics = DayStatistics(10, 10, 100, 100)
+          val toAdd: DayStatistics = DayStatistics(1, 1, 10, 10)
+          val result = dayStatistics + toAdd
+          val expected = DayStatistics(10 + 1, 10 + 1, 100 + 10, 100 + 10)
+          result should equal(expected)
+        }
+
+        "work correctly with empty day statistics" in {
+          val dayStatistics: DayStatistics = DayStatistics(10, 10, 100, 100)
+          val toAdd: DayStatistics = DayStatistics(0,0,0,0)
+          val result = dayStatistics + toAdd
+
+          result should equal(dayStatistics)
+        }
+      }
+
+
     }
   }
 }

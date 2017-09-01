@@ -1,14 +1,8 @@
 package pt.joseluisvf.glucopath.exception
 
-import java.util.UUID
-
 import pt.joseluisvf.glucopath.domain.measurement.Measurement
 
 sealed trait MeasurementError extends GlucopathError
-
-final case class MeasurementWithIdDoesNotExistError(id: UUID) extends MeasurementError {
-  override val reason: String = s"Could not find a measurement for the provided id <$id> ."
-}
 
 final case class GlucoseOutsideBoundsError(glucose: Int) extends MeasurementError {
   override val reason: String = s"The provided glucose reading <$glucose> should be within reasonable bounds" +

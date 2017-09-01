@@ -7,30 +7,39 @@ class DiabeticProfileTest extends WordSpec with Matchers {
   var diabeticProfile: DiabeticProfile = _
   var caught: DiabeticProfileException = _
 
-  "A diabetic profile" should {
-    "not be allowed to be created with negative values" in {
-      caught = intercept[DiabeticProfileException] {
-        diabeticProfile = DiabeticProfile(-1, (80, 150), 12)
+  "A diabetic profile" when {
+    "it is created with invalid values" when {
+
+      "the glucose mitigation is negative" in {
+        caught = intercept[DiabeticProfileException] {
+          diabeticProfile = DiabeticProfile(-1, (80, 150), 12)
+        }
+        caught.getGlucopathError should equal(GlucoseMitigationOutsideReasonableBoundsError(-1))
       }
 
-      caught.getGlucopathError should equal(GlucoseMitigationOutsideReasonableBoundsError(-1))
+      "the minimum glucose range is negative" in {
+        caught = intercept[DiabeticProfileException] {
+          diabeticProfile = DiabeticProfile(50, (-1, 150), 12)
+        }
+        caught.getGlucopathError should equal(GlucoseRangeOutsideReasonableBoundsError((-1, 150)))
 
-      caught = intercept[DiabeticProfileException] {
-        diabeticProfile = DiabeticProfile(50, (-1, 150), 12)
-      }
-      caught.getGlucopathError should equal(GlucoseRangeOutsideReasonableBoundsError((-1, 150)))
-
-      caught = intercept[DiabeticProfileException] {
-        diabeticProfile = DiabeticProfile(50, (80, -1), 12)
       }
 
-      caught.getGlucopathError should equal(GlucoseRangeOutsideReasonableBoundsError((80, -1)))
+      "the maximum glucose range is negative" in {
+        caught = intercept[DiabeticProfileException] {
+          diabeticProfile = DiabeticProfile(50, (80, -1), 12)
+        }
 
-      caught = intercept[DiabeticProfileException] {
-        diabeticProfile = DiabeticProfile(50, (80, 150), -1)
+        caught.getGlucopathError should equal(GlucoseRangeOutsideReasonableBoundsError((80, -1)))
       }
 
-      caught.getGlucopathError should equal(CarbohydrateMitigationOutsideReasonableBoundsError(-1))
+      "the carbohydrate mitigation is negative" in {
+        caught = intercept[DiabeticProfileException] {
+          diabeticProfile = DiabeticProfile(50, (80, 150), -1)
+        }
+
+        caught.getGlucopathError should equal(CarbohydrateMitigationOutsideReasonableBoundsError(-1))
+      }
     }
 
     "not be allowed to be created with an invalid range" in {
@@ -104,6 +113,29 @@ class DiabeticProfileTest extends WordSpec with Matchers {
         result should equal(expected)
       }
     }
+
+    "know if a a glucose reading corresponds to a hypoglycemia" in {
+      diabeticProfile = DiabeticProfile(40, (80, 160), 10)
+      diabeticProfile.isGlucoseHypoglycemia(79) should equal(true)
+      diabeticProfile.isGlucoseHypoglycemia(80) should equal(false)
+    }
+
+    "know if a a glucose reading corresponds to a hyperglycemia" in {
+      diabeticProfile = DiabeticProfile(40, (80, 160), 10)
+      diabeticProfile.isGlucoseHyperglycemia(161) should equal(true)
+      diabeticProfile.isGlucoseHyperglycemia(160) should equal(false)
+    }
+
+    "know if a a glucose reading is in range" in {
+      diabeticProfile = DiabeticProfile(40, (80, 160), 10)
+      diabeticProfile.isGlucoseInRange(80) should equal(true)
+      diabeticProfile.isGlucoseInRange(160) should equal(true)
+      diabeticProfile.isGlucoseInRange(120) should equal(true)
+      diabeticProfile.isGlucoseInRange(79) should equal(false)
+      diabeticProfile.isGlucoseInRange(161) should equal(false)
+    }
+
+
   }
 
 }
