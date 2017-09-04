@@ -10,7 +10,7 @@ case class Day(dayStatistics: DayStatistics, measurements: Measurements = Measur
 
   def slowInsulin: SlowInsulin = _slowInsulin
 
-  def slowInsulin(slowInsulin: SlowInsulin): Day = {
+  def slowInsulin_(slowInsulin: SlowInsulin): Day = {
     _slowInsulin = slowInsulin
     this
   }
@@ -21,7 +21,7 @@ case class Day(dayStatistics: DayStatistics, measurements: Measurements = Measur
   }
 
   def addMeasurements(toAdd: Measurements): Measurements = {
-    for (m <- measurements.measurements) {
+    for (m <- toAdd.measurements) {
       dayStatistics.addMeasurement(m)
     }
 
@@ -42,7 +42,9 @@ case class Day(dayStatistics: DayStatistics, measurements: Measurements = Measur
   def getGlucoseAverage: Float = dayStatistics.glucoseAverage
 
   override def toString: String = {
-    s"Metrics for $date :\n${dayStatistics.toString}\n${_slowInsulin.toString}\n\nMeasurements:\n${measurements.toString}"
+    s"Metrics for $date :\n${dayStatistics.toString}\n" +
+      s"${if(_slowInsulin.isDefault) "" else _slowInsulin.toString + "\n"}" +
+      s"\nMeasurements:\n${measurements.toString}"
   }
 }
 
