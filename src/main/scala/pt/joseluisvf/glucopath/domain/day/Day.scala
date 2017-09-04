@@ -21,7 +21,7 @@ case class Day(dayStatistics: DayStatistics, measurements: Measurements = Measur
   }
 
   def addMeasurements(toAdd: Measurements): Measurements = {
-    for (m <- measurements.measurements) {
+    for (m <- toAdd.measurements) {
       dayStatistics.addMeasurement(m)
     }
 
