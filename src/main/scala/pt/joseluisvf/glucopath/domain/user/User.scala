@@ -38,7 +38,7 @@ class User(val name: String, val days: Days, var diabeticProfile: DiabeticProfil
 
   def alterDiabeticProfile(newDiabeticProfile: DiabeticProfile): Unit = this.diabeticProfile = newDiabeticProfile
 
-  def alterSlowInsulin(slowInsulin: SlowInsulin, localDateTime: LocalDateTime) = {
+  def alterSlowInsulin(slowInsulin: SlowInsulin, localDateTime: LocalDateTime): Any = {
     days.alterSlowInsulin(slowInsulin, localDateTime)
   }
 }
