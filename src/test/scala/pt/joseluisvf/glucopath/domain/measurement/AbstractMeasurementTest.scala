@@ -3,13 +3,13 @@ package pt.joseluisvf.glucopath.domain.measurement
 import java.time.LocalDateTime
 import java.util.UUID
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{GivenWhenThen, Matchers, WordSpec}
 import pt.joseluisvf.glucopath.domain.measurement
 import pt.joseluisvf.glucopath.domain.measurement.BeforeOrAfterMeal.BeforeOrAfterMeal
 import pt.joseluisvf.glucopath.domain.measurement.WarningLevel.WarningLevel
 import pt.joseluisvf.glucopath.exception.MeasurementException
 
-abstract class AbstractMeasurementTest extends WordSpec with Matchers {
+abstract class AbstractMeasurementTest extends WordSpec with Matchers with GivenWhenThen {
   var caught: MeasurementException = _
   protected val DEFAULT_GLUCOSE = 100
   protected val DEFAULT_DATE_TIME: LocalDateTime =
@@ -49,7 +49,7 @@ abstract class AbstractMeasurementTest extends WordSpec with Matchers {
   protected val DEFAULT_UUID_2: UUID = UUID.randomUUID()
 
 
-  def makeDefaultMeasurement(): Measurement =
+  private def makeDefaultMeasurement(): Measurement =
     Measurement(
       DEFAULT_GLUCOSE,
       DEFAULT_DATE_TIME,
@@ -79,6 +79,9 @@ abstract class AbstractMeasurementTest extends WordSpec with Matchers {
     bugh(glucose, date, beforeOrAfterMeal, whatWasEaten, carbohydratesEaten, insulinAdministered, comments, warningLevel, id).asInstanceOf[Measurement]
   }
 
+  def withDefaultMeasurement(testCode: Measurement => Any): Unit = {
+    testCode(makeDefaultMeasurement())
+  }
 
   def withEmptyMeasurements(testCode: Measurements => Any): Unit = {
     val measurements = Measurements()

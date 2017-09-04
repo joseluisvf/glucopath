@@ -28,7 +28,7 @@ case class DiabeticProfile(
 
     val insulinUnitsRequiredForGoal =
       if (glucoseMeasured < glucoseGoal) {
-        // try to compensate cby providing a negative value
+        // try to compensate by providing a negative value
         Math.ceil((glucoseMeasured - glucoseGoal).asInstanceOf[Float] / glucoseMitigationPerInsulinUnit)
       } else {
         (glucoseMeasured - glucoseGoal).asInstanceOf[Float] / glucoseMitigationPerInsulinUnit
@@ -43,14 +43,11 @@ case class DiabeticProfile(
     else result
   }
 
-  val minGlucoseRange: Int = idealGlucoseRange._1
-  val maxGlucoseRange: Int = idealGlucoseRange._2
+  def isGlucoseHypoglycemia(glucose: Int): Boolean = glucose < idealGlucoseRange._1
 
-  def isGlucoseHypoglycemia(glucose: Int): Boolean = glucose <= minGlucoseRange
+  def isGlucoseHyperglycemia(glucose: Int): Boolean = glucose > idealGlucoseRange._2
 
-  def isGlucoseHyperglycemia(glucose: Int): Boolean = glucose >= maxGlucoseRange
-
-  def isGlucoseInRange(glucose: Int): Boolean = minGlucoseRange < glucose && glucose < maxGlucoseRange
+  def isGlucoseInRange(glucose: Int): Boolean = !(isGlucoseHypoglycemia(glucose) || isGlucoseHyperglycemia(glucose))
 
   private def isGlucoseMitigationWithinBounds: Boolean =
     DiabeticProfile.MINIMUM_GLUCOSE_MITIGATION <= glucoseMitigationPerInsulinUnit &&

@@ -3,6 +3,7 @@ import java.io.FileNotFoundException
 
 import measurement.UserProto
 import pt.joseluisvf.glucopath.domain.user.User
+import pt.joseluisvf.glucopath.persistence.GlucopathIO
 import pt.joseluisvf.glucopath.service.impl.UserServiceImpl
 import pt.joseluisvf.glucopath.service.mapper.UserMapperImpl
 
@@ -44,7 +45,7 @@ object PersistMenu extends GlucopathMenu{
     UserFeedbackHandler.displayInformationalMessage("Importing measurements...")
     try {
       val constructedUser: User = FileMeasurementsLoader.importMeasurementsFrom(pathToFile, user)
-      UserServiceImpl.saveUserToFile(constructedUser)
+      GlucopathIO.saveUserToFile(constructedUser)
       UserFeedbackHandler.displaySuccessMessage("Measurements imported with success. User state has been saved.")
       Some(constructedUser)
     } catch {

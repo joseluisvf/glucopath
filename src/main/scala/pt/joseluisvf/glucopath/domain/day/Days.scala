@@ -79,10 +79,10 @@ case class Days(days: ListBuffer[Day] = ListBuffer.empty) {
 
   def alterSlowInsulin(slowInsulin: SlowInsulin, localDateTime: LocalDateTime): Any = {
     getDayByDate(localDateTime.toLocalDate) match {
-      case Some(day) => day.slowInsulin(slowInsulin)
+      case Some(day) => day.slowInsulin_(slowInsulin)
       case _ =>
         val newDay = Day(localDateTime.toLocalDate)
-        newDay.slowInsulin(slowInsulin)
+        newDay.slowInsulin_(slowInsulin)
         this.addDay(newDay)
     }
   }

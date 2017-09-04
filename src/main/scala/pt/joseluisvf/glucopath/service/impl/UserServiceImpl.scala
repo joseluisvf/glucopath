@@ -7,18 +7,21 @@ import pt.joseluisvf.glucopath.domain.day.SlowInsulin
 import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
 import pt.joseluisvf.glucopath.domain.user.{User, UserStatistics}
 import pt.joseluisvf.glucopath.domain.util.DateParser
-import pt.joseluisvf.glucopath.exception.{DiabeticProfileError, DiabeticProfileException, SlowInsulinError, SlowInsulinException}
+import pt.joseluisvf.glucopath.exception._
 import pt.joseluisvf.glucopath.persistence.GlucopathIO
 import pt.joseluisvf.glucopath.service.UserService
 import pt.joseluisvf.glucopath.service.mapper._
 
 object UserServiceImpl extends UserService {
-  override def addMeasurement(userProto: UserProto, measurementProto: MeasurementProto): UserProto = {
+  override def addMeasurement(userProto: UserProto, measurementProto: MeasurementProto): Either[MeasurementError, UserProto] = {
     val user: User = UserMapperImpl.toEntity(userProto)
-    val measurement: Measurement = MeasurementMapperImpl.toEntity(measurementProto)
-    user.addMeasurement(measurement)
-    saveUserToFile(user)
-    UserMapperImpl.toProto(user)
+    try {
+      val measurement: Measurement = MeasurementMapperImpl.toEntity(measurementProto)
+      user.addMeasurement(measurement)
+      Right(UserMapperImpl.toProto(user))
+    } catch {
+      case me: MeasurementException => Left(me.getGlucopathError.asInstanceOf[MeasurementError])
+    }
   }
 
   override def getDayByDate(userProto: UserProto, date: String): Option[DayProto] = {
@@ -42,16 +45,14 @@ object UserServiceImpl extends UserService {
     user.getOverallInfo
   }
 
-  def saveUserToFile(user: User): Unit = GlucopathIO.saveUserToFile(user)
-
-  override def exportMeasurements(userProto: UserProto): Unit = {
+  override def exportMeasurements(userProto: UserProto,pathToFile: String = GlucopathIO.measurementsFileLocation): Unit = {
     val user: User = UserMapperImpl.toEntity(userProto)
     val measurements: Measurements = user.getAllMeasurements
     val toWrite = measurements.measurements.map(measurementToString).mkString("\n")
-    GlucopathIO.saveMeasurementsToFile(toWrite)
+    GlucopathIO.saveMeasurementsToFile(toWrite, pathToFile)
   }
 
-  private def measurementToString(measurement: Measurement) = {
+  private def measurementToString(measurement: Measurement): String = {
     s"${measurement.glucose}," +
       s"${measurement.date.toString}," +
       s"${measurement.beforeOrAfterMeal.toString}," +
@@ -67,21 +68,21 @@ object UserServiceImpl extends UserService {
     UserStatistics.showMetricsPerTimePeriod(user)
   }
 
-  override def writeMetricsPerTimePeriod(userProto: UserProto): Unit = {
+  override def writeMetricsPerTimePeriod(userProto: UserProto, pathToFile: String = GlucopathIO.metricsFileLocation): Unit = {
     val user: User = UserMapperImpl.toEntity(userProto)
     val metricsAsCsv = UserStatistics.getMetricsAsCsv(user)
-    GlucopathIO.saveMetricsToFile(metricsAsCsv)
+    GlucopathIO.saveMetricsToFile(metricsAsCsv, pathToFile)
   }
 
   override def alterDiabeticProfile(
                                      userProto: UserProto,
                                      diabeticProfileProto: DiabeticProfileProto): Either[DiabeticProfileError, UserProto] = {
+
     val user: User = UserMapperImpl.toEntity(userProto)
     try {
       val newDiabeticProfile = DiabeticProfileMapperImpl.toEntity(diabeticProfileProto)
       user.alterDiabeticProfile(newDiabeticProfile)
 
-      saveUserToFile(user)
       Right(UserMapperImpl.toProto(user))
     } catch {
       case dpe: DiabeticProfileException =>
@@ -93,12 +94,12 @@ object UserServiceImpl extends UserService {
                                  userProto: UserProto,
                                  slowInsulinProto: SlowInsulinProto,
                                  localDateTime: LocalDateTime): Either[SlowInsulinError, UserProto] = {
+
     val user: User = UserMapperImpl.toEntity(userProto)
 
     try {
       val slowInsulin: SlowInsulin = SlowInsulinMapperImpl.toEntity(slowInsulinProto)
       user.alterSlowInsulin(slowInsulin, localDateTime)
-      saveUserToFile(user)
       Right(UserMapperImpl.toProto(user))
     } catch {
       case sie: SlowInsulinException =>

@@ -17,7 +17,7 @@ object DayMapperImpl extends DayMapper {
     val result: Day = Day(dayStatistics, measurements, date, id)
 
     proto.slowInsulin match {
-      case Some(slowProto) => result.slowInsulin(SlowInsulinMapperImpl.toEntity(slowProto))
+      case Some(slowProto) => result.slowInsulin_(SlowInsulinMapperImpl.toEntity(slowProto))
       case _ => result
     }
   }

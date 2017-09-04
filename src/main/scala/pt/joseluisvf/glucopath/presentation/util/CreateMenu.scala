@@ -9,7 +9,8 @@ import pt.joseluisvf.glucopath.domain.measurement.WarningLevel.WarningLevel
 import pt.joseluisvf.glucopath.domain.measurement.{BeforeOrAfterMeal, Measurement, WarningLevel}
 import pt.joseluisvf.glucopath.domain.user.User
 import pt.joseluisvf.glucopath.domain.util.DateParser
-import pt.joseluisvf.glucopath.exception.{DiabeticProfileError, SlowInsulinError, SlowInsulinException}
+import pt.joseluisvf.glucopath.exception.{DiabeticProfileError, SlowInsulinException}
+import pt.joseluisvf.glucopath.persistence.GlucopathIO
 import pt.joseluisvf.glucopath.service.impl.UserServiceImpl
 import pt.joseluisvf.glucopath.service.mapper.{MeasurementMapperImpl, SlowInsulinMapperImpl, UserMapperImpl}
 
@@ -38,7 +39,16 @@ object CreateMenu extends GlucopathMenu {
   override protected def executeOption(option: String): Boolean = {
     option match {
       case OPTION_0 => false;
-      case OPTION_1 => updateUser(collectAndAddMeasurement()); println(DisplayOptions.getSeparator); true
+      case OPTION_1 => collectAndAddMeasurement() match {
+        case Some(u) =>
+          GlucopathIO.saveUserToFile(u)
+          updateUser(u)
+          println(DisplayOptions.getSeparator)
+          true
+        case None =>
+          println(DisplayOptions.getSeparator)
+          true
+      }
       case OPTION_2 => calculateInsulinToAdminister() match {
         case Some(u) => updateUser(u)
         case _ =>
@@ -47,14 +57,18 @@ object CreateMenu extends GlucopathMenu {
         true
 
       case OPTION_3 => alterDiabeticProfile() match {
-        case Some(u) => updateUser(u)
+        case Some(u) =>
+          GlucopathIO.saveUserToFile(u)
+          updateUser(u)
         case _ =>
       }
         println(DisplayOptions.getSeparator)
         true
 
       case OPTION_4 => addSlowInsulinInformation() match {
-        case Some(u) => updateUser(u)
+        case Some(u) =>
+          GlucopathIO.saveUserToFile(u)
+          updateUser(u)
         case _ =>
       }
         println(DisplayOptions.getSeparator)
@@ -64,19 +78,21 @@ object CreateMenu extends GlucopathMenu {
     }
   }
 
-  private def collectAndAddMeasurement(): User = {
+  private def collectAndAddMeasurement(): Option[User] = {
     val toAdd: Measurement = collectMeasurementFromUser()
     addMeasurement(toAdd)
   }
 
-  private def addMeasurement(toAdd: Measurement): User = {
+  private def addMeasurement(toAdd: Measurement): Option[User] = {
     val measurementProto: MeasurementProto = MeasurementMapperImpl.toProto(toAdd)
-    var userProto: UserProto = UserMapperImpl.toProto(user)
+    val userProto: UserProto = UserMapperImpl.toProto(user)
 
-    userProto = UserServiceImpl.addMeasurement(userProto, measurementProto)
-
-    UserFeedbackHandler.displaySuccessMessage("Measurement added with success!")
-    UserMapperImpl.toEntity(userProto)
+    UserServiceImpl.addMeasurement(userProto, measurementProto) match {
+      case Left(error) => UserFeedbackHandler.displayErrorMessage(error.reason); None
+      case Right(u) =>
+        UserFeedbackHandler.displaySuccessMessage("Measurement added with success.")
+        Some(UserMapperImpl.toEntity(u));
+    }
   }
 
   final private def collectMeasurementFromUser(): Measurement = {
@@ -192,9 +208,14 @@ object CreateMenu extends GlucopathMenu {
     userChoiceCreateMeasurement.toUpperCase() match {
       case "" | "Y" =>
         val toAdd: Measurement = collectPartialMeasurementFromUser(glucoseMeasured, carbohydratesConsumed, insulinToAdminister)
-        val modifiedUser: User = addMeasurement(toAdd)
+        addMeasurement(toAdd) match {
+          case Some(u) =>
         UserFeedbackHandler.displaySuccessMessage("Measurement added with success.")
-        Some(modifiedUser)
+            Some(u)
+          case None =>
+            UserFeedbackHandler.displayErrorMessage("Could not add measurement with the provided date")
+            None
+        }
       case _ => None
     }
   }

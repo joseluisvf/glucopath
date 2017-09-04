@@ -12,6 +12,8 @@ libraryDependencies += "org.scalatest" % "scalatest_2.12" % "3.2.0-SNAP9" % "tes
 // scoverage
 // https://mvnrepository.com/artifact/org.scoverage/scalac-scoverage-plugin_2.11
 libraryDependencies += "org.scoverage" % "scalac-scoverage-plugin_2.12" % "1.3.0" % "provided"
+libraryDependencies ++= Seq("org.scoverage" %% "scalac-scoverage-runtime" % "1.3.0")
+
 coverageExcludedPackages :=
   """
     |.*GlucopathEntryPoint.*;
@@ -25,6 +27,8 @@ coverageExcludedPackages :=
     | measurement.*;
     | pt.joseluisvf.glucopath.domain.user.UserStatistics.*;
     | """.stripMargin
+
+//coverageEnabled.in(Test, test) := true
 
 // jackson
 // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core

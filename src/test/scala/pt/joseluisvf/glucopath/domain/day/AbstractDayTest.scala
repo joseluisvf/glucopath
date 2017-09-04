@@ -2,10 +2,10 @@ package pt.joseluisvf.glucopath.domain.day
 
 import java.time.{LocalDate, LocalDateTime}
 
-import org.scalatest.{BeforeAndAfterEach, Matchers, PrivateMethodTester, WordSpec}
+import org.scalatest._
 import pt.joseluisvf.glucopath.domain.measurement.{BeforeOrAfterMeal, Measurement}
 
-abstract class AbstractDayTest extends WordSpec with Matchers with BeforeAndAfterEach with PrivateMethodTester {
+abstract class AbstractDayTest extends WordSpec with Matchers with PrivateMethodTester with GivenWhenThen {
   private val localDateAlpha = LocalDateTime.of(1, 1, 1, 1, 1)
   private val localDateBeta = LocalDateTime.of(2, 2, 2, 2, 2)
   private val today = LocalDateTime.now()
@@ -25,5 +25,23 @@ abstract class AbstractDayTest extends WordSpec with Matchers with BeforeAndAfte
     days invokePrivate getDayByDate(date)
   }
 
+  def withDayWithOneMeasurement(testCode: Day => Any, toAdd: Measurement) : Unit = {
+    val day = Day().addMeasurement(toAdd)
+  }
 
+  def withDayWithMoreThanOneMeasurement(testCode: Day => Any, toAdd: Measurement*) : Unit = {
+    val day = Day()
+    toAdd.foreach(day.addMeasurement)
+  }
+
+  def withEmptyDays(testCode: Days => Any): Unit = {
+    val days = Days()
+    testCode(days)
+  }
+
+  def withNonEmptyDays(testCode: Days => Any, toAdd: Day*): Unit = {
+    val daysToAdd = scala.collection.mutable.ListBuffer.empty[Day]
+    toAdd.foreach(daysToAdd += _)
+    testCode(Days(daysToAdd))
+  }
 }

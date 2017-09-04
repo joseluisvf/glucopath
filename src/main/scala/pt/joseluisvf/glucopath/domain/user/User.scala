@@ -5,10 +5,12 @@ import java.util.UUID
 
 import pt.joseluisvf.glucopath.domain.day.{Day, Days, SlowInsulin}
 import pt.joseluisvf.glucopath.domain.measurement.{Measurement, Measurements}
-import pt.joseluisvf.glucopath.exception.DayError
+import pt.joseluisvf.glucopath.exception.{DayError, DiabeticProfileNotDefinedError, UserException}
 import pt.joseluisvf.glucopath.presentation.util.DisplayOptions
 
 class User(val name: String, val days: Days, var diabeticProfile: DiabeticProfile) {
+
+  require(diabeticProfile != null, throw new UserException(DiabeticProfileNotDefinedError()))
 
   def addMeasurement(toAdd: Measurement): Measurements = days.addMeasurement(toAdd)
 

@@ -9,10 +9,10 @@ import pt.joseluisvf.glucopath.domain.user.User
 import pt.joseluisvf.glucopath.service.mapper.UserMapperImpl
 
 object GlucopathIO {
-  private val persistenceFileLocation = "src/main/resources/glucopath_user_data.txt"
-  private val fileBackupLocation = "src/main/resources/glucopath_user_data_backup.txt"
-  private val measurementsFileLocation = "src/main/resources/measurements.csv"
-  private val metricsFileLocation = "src/main/resources/metrics.csv"
+  val persistenceFileLocation = "src/main/resources/glucopath_user_data.txt"
+  val fileBackupLocation = "src/main/resources/glucopath_user_data_backup.txt"
+  val measurementsFileLocation = "src/main/resources/measurements.csv"
+  val metricsFileLocation = "src/main/resources/metrics.csv"
 
   def saveUserToFile(toSave: User): Unit = {
     val writer = new FileOutputStream(persistenceFileLocation)
@@ -39,15 +39,15 @@ object GlucopathIO {
     }
   }
 
-  def saveMeasurementsToFile(measurements: String): Unit = {
-    val writer = new PrintWriter(new File(measurementsFileLocation))
+  def saveMeasurementsToFile(measurements: String, pathToFile: String = measurementsFileLocation): Unit = {
+    val writer = new PrintWriter(new File(pathToFile))
     val toWrite = "glucose,date,before or after meal,what was eaten,carbohydrates eaten in grams,insulin administered,comments,warning level\n" + measurements
     writer.write(toWrite)
     writer.close()
   }
 
-  def saveMetricsToFile(metrics: String): Unit = {
-    val writer = new PrintWriter(new File(metricsFileLocation))
+  def saveMetricsToFile(metrics: String, pathToFile: String = metricsFileLocation): Unit = {
+    val writer = new PrintWriter(new File(pathToFile))
     writer.write(metrics)
     writer.close()
   }
