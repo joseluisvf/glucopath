@@ -64,7 +64,11 @@ case class Days(days: ListBuffer[Day] = ListBuffer.empty) {
     for (day <- days) {
       allMeasurements.addMeasurements(day.measurements)
     }
-    allMeasurements
+    Measurements(allMeasurements.measurements.sortWith((x,y) => sortMeasurements(x,y)))
+  }
+
+  private def sortMeasurements(x: Measurement, y: Measurement) = {
+     x.date.compareTo(y.date) < 0
   }
 
   def aggregateDayStatistics: DayStatistics = {
