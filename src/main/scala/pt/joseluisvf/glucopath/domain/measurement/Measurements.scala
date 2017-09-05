@@ -6,16 +6,11 @@ import pt.joseluisvf.glucopath.presentation.util.DisplayOptions
 
 import scala.collection.mutable.ListBuffer
 
-case class Measurements(var measurements: ListBuffer[Measurement] = ListBuffer.empty) {
+case class Measurements(measurements: ListBuffer[Measurement] = ListBuffer.empty) {
 
   def addMeasurement(toAdd: Measurement): Measurements = {
     measurements += toAdd
-    measurements = measurements.sortWith((x, y) => sortMeasurements(x, y))
     this
-  }
-
-  private def sortMeasurements(x: Measurement, y: Measurement) = {
-    x.date.compareTo(y.date) < 0
   }
 
   def addMeasurements(toAdd: Measurements): Measurements = {
