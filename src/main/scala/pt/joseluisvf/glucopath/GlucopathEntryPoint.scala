@@ -11,9 +11,7 @@ object GlucopathEntryPoint extends App {
   var optionSelected = ""
 
   UserFeedbackHandler.displayInformationalMessage(s"Welcome to Glucopath ${adam.name}\n")
-
   MainMenu.loopExecution(adam)
-
 
   def loadUserOrCreateNewOne(): User = {
     val maybeUser = GlucopathIO.loadUserFromFile()
